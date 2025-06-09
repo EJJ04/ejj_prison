@@ -54,6 +54,7 @@
   "cooking_desc": "Hjælp i fængsels køkkenet - Gå til køkkenet for at starte",
   "electrician_desc": "Reparer elektriske bokse - Gå til elektriske bokse for at starte", 
   "training_desc": "Fuldfør fysisk træning - Gå til træningsområderne for at starte",
+  "prison_shop": "Fængsels Butik",
   
   "ui_talk_guard": "[E] Tal med Fængselsvagt",
   "ui_prison_shop": "[E] Fængsels Butik", 

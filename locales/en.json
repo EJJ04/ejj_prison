@@ -54,6 +54,7 @@
   "cooking_desc": "Help in the prison kitchen - Go to the kitchen to start",
   "electrician_desc": "Fix electrical boxes - Go to electrical boxes to start", 
   "training_desc": "Complete physical training - Go to training areas to start",
+  "prison_shop": "Prison Shop",
   
   "ui_talk_guard": "[E] Talk to Prison Guard",
   "ui_prison_shop": "[E] Prison Shop", 

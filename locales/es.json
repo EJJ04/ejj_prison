@@ -54,6 +54,7 @@
   "cooking_desc": "Ayudar en la cocina de la cárcel - Ve a la cocina para empezar",
   "electrician_desc": "Reparar cajas eléctricas - Ve a las cajas eléctricas para empezar", 
   "training_desc": "Completar entrenamiento físico - Ve a las áreas de entrenamiento para empezar",
+  "prison_shop": "Tienda de la Cárcel",
   
   "ui_talk_guard": "[E] Hablar con Guardia de la Cárcel",
   "ui_prison_shop": "[E] Tienda de la Cárcel", 

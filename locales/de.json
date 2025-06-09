@@ -54,6 +54,7 @@
   "cooking_desc": "Hilf in der Gefängnisküche - Gehe zur Küche, um zu beginnen",
   "electrician_desc": "Repariere Elektrokästen - Gehe zu den Elektrokästen, um zu beginnen", 
   "training_desc": "Absolviere körperliches Training - Gehe zu den Trainingsbereichen, um zu beginnen",
+  "prison_shop": "Gefängnisladen",
   
   "ui_talk_guard": "[E] Mit Gefängniswärter sprechen",
   "ui_prison_shop": "[E] Gefängnisladen", 
