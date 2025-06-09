@@ -285,8 +285,4 @@ end)
 
 ## Support
 
-For support, bug reports, or feature requests, please contact the resource author or check the resource documentation.
-
-## License
-
-This resource is provided as-is. Please respect the author's work and any licensing terms. 
+For support, bug reports, or feature requests, please contact me at - https://discord.gg/N869PRHGfd.
