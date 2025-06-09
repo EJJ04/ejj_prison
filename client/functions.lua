@@ -1,62 +1,3 @@
---[[
-    EJJ Prison Menu System
-    
-    This file contains universal menu functions that work with different frameworks:
-    - ox_lib (default)
-    - ESX
-    - QBCore
-    
-    Usage Examples:
-    
-    1. Simple Menu:
-    ShowMenu({
-        id = 'example_menu',
-        title = 'Example Menu',
-        items = {
-            {
-                title = 'Option 1',
-                description = 'This is option 1',
-                icon = 'fas fa-check',
-                onSelect = function()
-                    print('Option 1 selected')
-                end
-            },
-            {
-                title = 'Option 2',
-                description = 'This is option 2',
-                icon = 'fas fa-times',
-                serverEvent = 'my_server_event',
-                args = {data = 'test'}
-            }
-        }
-    })
-    
-    2. Advanced Menu with ESX Input:
-    ShowMenu({
-        id = 'input_menu',
-        title = 'Input Menu',
-        items = {
-            {
-                title = 'Text Input',
-                input = true,
-                inputType = 'text',
-                inputPlaceholder = 'Enter text...',
-                name = 'text_input'
-            },
-            {
-                title = 'Submit',
-                onSelect = function(option, element)
-                    -- Handle form submission
-                end
-            }
-        }
-    })
-    
-    3. Menu Control Functions:
-    CloseMenu() -- Close any open menu
-    GetOpenMenu() -- Get current open menu ID (ox_lib only)
-]]
-
 function SpawnPed(model, coords)
     lib.requestModel(model, 10000)
     while not HasModelLoaded(model) do Wait(0) end
@@ -76,7 +17,6 @@ function SpawnObject(model, coords)
     return object
 end
 
--- Function to handle skill check minigames
 function StartMinigame()
     local totalTries = Config.MinigameTries or 1
     local difficulties = {'easy', 'medium', 'hard'}
@@ -85,19 +25,17 @@ function StartMinigame()
         local success = lib.skillCheck(difficulties)
         
         if not success then
-            return false -- Failed on attempt i, minigame fails
+            return false 
         end
         
-        -- Brief pause between skill checks (except for the last one)
         if i < totalTries then
             Wait(500)
         end
     end
     
-    return true -- All skill checks completed successfully
+    return true 
 end
 
--- Function to handle police dispatch for prison breaks
 function PoliceDispatch(data)
     if not Config.Dispatch.enabled then
         return
@@ -147,7 +85,7 @@ function PoliceDispatch(data)
             sprite = Config.Dispatch.blip.sprite,
             color = Config.Dispatch.blip.colour,
             scale = Config.Dispatch.blip.scale,
-            length = Config.Dispatch.blip.time / 20 -- Convert seconds to ps-dispatch length
+            length = Config.Dispatch.blip.time / 20 
         }
         exports["ps-dispatch"]:CustomAlert(alert)
         
@@ -239,7 +177,6 @@ function PoliceDispatch(data)
     end
 end
 
--- Function to handle job completion
 function CompleteJob(jobType)
     if not Config.JobRewards[jobType] then
         return false
@@ -249,7 +186,6 @@ function CompleteJob(jobType)
     return true
 end
 
--- Function to check if player is in jail
 function IsPlayerInJail()
     local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
     return jailTime > 0
@@ -269,7 +205,6 @@ function Notify(message, type)
 end
 
 function ShowTextUI(text, position)
-    -- Use config position if no position parameter provided
     local uiPosition = position or Config.TextUIPosition
     
     if Config.TextUI == 'ox_lib' then
@@ -296,7 +231,6 @@ end
 
 function Menu(menuData)
     if Config.Menu == 'ox_lib' or not Config.Menu then
-        -- OX_LIB Context Menu
         if menuData.register then
             lib.registerContext(menuData.data)
         end
@@ -310,7 +244,6 @@ function Menu(menuData)
             return lib.getOpenContextMenu()
         end
     elseif Config.Menu == 'esx' then
-        -- ESX Context Menu
         if menuData.show then
             ESX.OpenContext(menuData.position or 'right', menuData.elements, menuData.onSelect, menuData.onClose)
         elseif menuData.preview then
@@ -321,7 +254,6 @@ function Menu(menuData)
             ESX.RefreshContext(menuData.position or 'right', menuData.elements)
         end
     elseif Config.Menu == 'qb' then
-        -- QBCore Menu
         if menuData.show then
             exports['qb-menu']:openMenu(menuData.data, menuData.sort or false, menuData.skipFirst or false)
         elseif menuData.hide then
@@ -330,7 +262,6 @@ function Menu(menuData)
     end
 end
 
--- Advanced menu function with format conversion
 function ShowMenu(options)
     local menuType = Config.Menu or 'ox_lib'
     
@@ -460,7 +391,6 @@ function ShowQBMenu(options)
     exports['qb-menu']:openMenu(menuData, options.sort or false, options.skipFirst or false)
 end
 
--- Helper function to close any open menu
 function CloseMenu()
     local menuType = Config.Menu or 'ox_lib'
     
@@ -473,7 +403,6 @@ function CloseMenu()
     end
 end
 
--- Helper function to get current open menu (ox_lib only)
 function GetOpenMenu()
     local menuType = Config.Menu or 'ox_lib'
     
@@ -492,4 +421,50 @@ function IsPlayerPolice()
     end
 
     return false
+end
+
+function ChangeClothes(type)
+    lib.requestAnimDict("clothingshirt", 10000)
+    TaskPlayAnim(cache.ped, "clothingshirt", "try_shirt_positive_d", 8.0, 1.0, -1, 49, 0, 0, 0, 0)
+    Wait(1000)
+    
+    if type == "prison" then
+        if GetEntityModel(cache.ped) == GetHashKey("mp_m_freemode_01") then
+            for k, v in pairs(Config.PrisonClothes.male) do
+                SetPedComponentVariation(cache.ped, v.component_id, v.drawable, v.texture, 0)
+            end
+        else
+            for k, v in pairs(Config.PrisonClothes.female) do
+                SetPedComponentVariation(cache.ped, v.component_id, v.drawable, v.texture, 0)
+            end
+        end
+        if Config.PrisonClothes.hat.drawable ~= -1 then
+            SetPedPropIndex(cache.ped, Config.PrisonClothes.hat.component_id, Config.PrisonClothes.hat.drawable, Config.PrisonClothes.hat.texture, true)
+        else
+            ClearPedProp(cache.ped, Config.PrisonClothes.hat.component_id)
+        end
+    else
+        if Framework == "qb" then
+            TriggerServerEvent('qb-clothes:loadPlayerSkin')
+        elseif Framework == "esx" then
+            ESX.TriggerServerCallback('esx_skin:getPlayerSkin', function(skin)
+                TriggerEvent('skinchanger:loadSkin', skin)
+            end)
+        elseif Framework == "qbx" then
+            TriggerServerEvent('qb-clothes:loadPlayerSkin')
+        else
+            SetPedDefaultComponentVariation(cache.ped)
+            ClearPedProp(cache.ped, 0)
+        end
+        
+        -- Try common appearance system events
+        TriggerEvent("fivem-appearance:client:reloadSkin")
+        TriggerEvent("fivem-appearance:ReloadSkin")
+        TriggerEvent("illenium-appearance:client:reloadSkin")
+        TriggerEvent("illenium-appearance:ReloadSkin")
+    end
+    
+    Wait(1000)
+    ClearPedTasks(cache.ped)
+    RemoveAnimDict("clothingshirt")
 end

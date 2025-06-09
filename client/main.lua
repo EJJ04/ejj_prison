@@ -18,8 +18,10 @@ end)
 RegisterNetEvent('ejj_prison:jailStatusChanged', function(isJailed)
     if isJailed then
         SpawnResourceObjects()
+        InitializeResourceSystem()
     else
         CleanupResourceObjects()
+        CleanupResourcePoints() 
         lastJobSelectionTime = 0
         currentJob = nil
         ClearJobPoints()
@@ -105,7 +107,6 @@ function StartDigging()
     CleanupEscapeProps()
     
     if success then
-        HideTextUI()
         TriggerServerEvent('ejj_prison:tunnelDug')
         Notify(locale('tunnel_dug_success'), 'success')
     else
@@ -117,8 +118,6 @@ function EscapeThroughTunnel()
     if not IsPlayerInJail() then
         return
     end
-    
-    HideTextUI()
     
     SetEntityCoords(cache.ped, Config.Escape.exit.coords.x, Config.Escape.exit.coords.y, Config.Escape.exit.coords.z)
     SetEntityHeading(cache.ped, Config.Escape.exit.coords.w)
@@ -325,128 +324,209 @@ function HandleShopInteraction()
     })
 end
 
-local metalPoint = lib.points.new({
-    coords = Config.Crafting.resources.metal.coords,
-    distance = Config.Crafting.resources.metal.radius
-})
+local resourcePickupCounts = {}
+local resourcePoints = {}
 
-function metalPoint:onEnter()
-    if IsPlayerInJail() then
-        ShowTextUI(locale('ui_pickup_metal'))
-    end
-end
-
-function metalPoint:onExit()
-    HideTextUI()
-end
-
-function metalPoint:nearby()
-    if IsControlJustReleased(0, 38) then 
-        if not IsPlayerInJail() then
-            return
+function InitializeResourceSystem()
+    resourcePickupCounts = {}
+    
+    local shovelRecipe = Config.Crafting.recipes.shovel
+    if shovelRecipe and shovelRecipe.ingredients then
+        for ingredient, maxAmount in pairs(shovelRecipe.ingredients) do
+            resourcePickupCounts[ingredient] = {
+                current = 0,
+                max = maxAmount
+            }
         end
-        
-        HideTextUI()
-        lib.playAnim(cache.ped, 'amb@prop_human_bum_bin@idle_b', 'idle_d', 8.0, 8.0, 3000, 1, 0, false, false, false)
-        
-        Wait(3000)
-        TriggerServerEvent('ejj_prison:pickupResource', Config.Crafting.resources.metal.item)
-        ClearPedTasksImmediately(cache.ped)
     end
+    
+    CreateResourcePoints()
 end
 
-local woodPoint = lib.points.new({
-    coords = vector3(Config.Crafting.resources.wood.coords.x, Config.Crafting.resources.wood.coords.y, Config.Crafting.resources.wood.coords.z),
-    distance = Config.Crafting.resources.wood.radius
-})
-
-function woodPoint:onEnter()
-    if IsPlayerInJail() and resourceObjects['wood'] and DoesEntityExist(resourceObjects['wood']) then
-        ShowTextUI(locale('ui_pickup_wood'))
+function CreateResourcePoints()
+    for _, point in pairs(resourcePoints) do
+        if point and point.remove then
+            point:remove()
+        end
     end
-end
+    resourcePoints = {}
+    
+    if resourcePickupCounts['metal_scrap'] and resourcePickupCounts['metal_scrap'].current < resourcePickupCounts['metal_scrap'].max then
+        resourcePoints.metal = lib.points.new({
+            coords = Config.Crafting.resources.metal.coords,
+            distance = Config.Crafting.resources.metal.radius
+        })
 
-function woodPoint:onExit()
-    HideTextUI()
-end
-
-function woodPoint:nearby()
-    if IsControlJustReleased(0, 38) then 
-        if not IsPlayerInJail() then
-            return
-        end
-        
-        if not resourceObjects['wood'] or not DoesEntityExist(resourceObjects['wood']) then
-                Notify(locale('no_wood_planks'), 'error')
-            return
-        end
-        
-        HideTextUI()
-        lib.playAnim(cache.ped, 'amb@prop_human_bum_bin@idle_b', 'idle_d', 8.0, 8.0, 3000, 1, 0, false, false, false)
-        
-        Wait(3000)
-        
-        DeleteEntity(resourceObjects['wood'])
-        resourceObjects['wood'] = nil
-        
-        TriggerServerEvent('ejj_prison:pickupResource', Config.Crafting.resources.wood.item)
-        ClearPedTasksImmediately(cache.ped)
-        
-        SetTimeout(Config.Crafting.resources.wood.object.respawnTime, function()
-            if not resourceObjects['wood'] or not DoesEntityExist(resourceObjects['wood']) then
-                local object = SpawnObject(Config.Crafting.resources.wood.object.model, Config.Crafting.resources.wood.coords)
-                SetEntityCollision(object, false, false)
-                resourceObjects['wood'] = object
+        function resourcePoints.metal:onEnter()
+            if IsPlayerInJail() then
+                local remaining = resourcePickupCounts['metal_scrap'].max - resourcePickupCounts['metal_scrap'].current
+                ShowTextUI(locale('ui_pickup_metal') .. ' (' .. remaining .. ' left)')
             end
-        end)
-    end
-end
-
-local ducttapePoint = lib.points.new({
-    coords = vector3(Config.Crafting.resources.ducttape.coords.x, Config.Crafting.resources.ducttape.coords.y, Config.Crafting.resources.ducttape.coords.z),
-    distance = Config.Crafting.resources.ducttape.radius
-})
-
-function ducttapePoint:onEnter()
-    if IsPlayerInJail() and resourceObjects['ducttape'] and DoesEntityExist(resourceObjects['ducttape']) then
-        ShowTextUI(locale('ui_pickup_tape'))
-    end
-end
-
-function ducttapePoint:onExit()
-    HideTextUI()
-end
-
-function ducttapePoint:nearby()
-    if IsControlJustReleased(0, 38) then 
-        if not IsPlayerInJail() then
-            return
         end
-        
-        if not resourceObjects['ducttape'] or not DoesEntityExist(resourceObjects['ducttape']) then
-                Notify(locale('no_duct_tape'), 'error')
-            return
+
+        function resourcePoints.metal:onExit()
+            HideTextUI()
         end
-        
-        HideTextUI()
-        lib.playAnim(cache.ped, 'amb@prop_human_bum_bin@idle_b', 'idle_d', 8.0, 8.0, 3000, 1, 0, false, false, false)
-        
-        Wait(3000)
-        
-        DeleteEntity(resourceObjects['ducttape'])
-        resourceObjects['ducttape'] = nil
-        
-        TriggerServerEvent('ejj_prison:pickupResource', Config.Crafting.resources.ducttape.item)
-        ClearPedTasksImmediately(cache.ped)
-        
-        SetTimeout(Config.Crafting.resources.ducttape.object.respawnTime, function()
-            if not resourceObjects['ducttape'] or not DoesEntityExist(resourceObjects['ducttape']) then
-                local object = SpawnObject(Config.Crafting.resources.ducttape.object.model, Config.Crafting.resources.ducttape.coords)
-                SetEntityCollision(object, false, false)
-                resourceObjects['ducttape'] = object
+
+        function resourcePoints.metal:nearby()
+            if IsControlJustReleased(0, 38) then 
+                if not IsPlayerInJail() then
+                    return
+                end
+                
+                if resourcePickupCounts['metal_scrap'].current >= resourcePickupCounts['metal_scrap'].max then
+                    Notify(locale('resource_limit_reached_metal'), 'error')
+                    return
+                end
+                
+                lib.playAnim(cache.ped, 'amb@prop_human_bum_bin@idle_b', 'idle_d', 8.0, 8.0, 3000, 1, 0, false, false, false)
+                
+                Wait(3000)
+                
+                resourcePickupCounts['metal_scrap'].current = resourcePickupCounts['metal_scrap'].current + 1
+                
+                TriggerServerEvent('ejj_prison:pickupResource', Config.Crafting.resources.metal.item)
+                ClearPedTasksImmediately(cache.ped)
+                
+                if resourcePickupCounts['metal_scrap'].current >= resourcePickupCounts['metal_scrap'].max then
+                    self:remove()
+                    resourcePoints.metal = nil
+                end
             end
-        end)
+        end
     end
+    
+    if resourcePickupCounts['wood_plank'] and resourcePickupCounts['wood_plank'].current < resourcePickupCounts['wood_plank'].max then
+        resourcePoints.wood = lib.points.new({
+            coords = vector3(Config.Crafting.resources.wood.coords.x, Config.Crafting.resources.wood.coords.y, Config.Crafting.resources.wood.coords.z),
+            distance = Config.Crafting.resources.wood.radius
+        })
+
+        function resourcePoints.wood:onEnter()
+            if IsPlayerInJail() and resourceObjects['wood'] and DoesEntityExist(resourceObjects['wood']) then
+                local remaining = resourcePickupCounts['wood_plank'].max - resourcePickupCounts['wood_plank'].current
+                ShowTextUI(locale('ui_pickup_wood') .. ' (' .. remaining .. ' left)')
+            end
+        end
+
+        function resourcePoints.wood:onExit()
+            HideTextUI()
+        end
+
+        function resourcePoints.wood:nearby()
+            if IsControlJustReleased(0, 38) then 
+                if not IsPlayerInJail() then
+                    return
+                end
+                
+                if resourcePickupCounts['wood_plank'].current >= resourcePickupCounts['wood_plank'].max then
+                    Notify(locale('resource_limit_reached_wood'), 'error')
+                    return
+                end
+                
+                if not resourceObjects['wood'] or not DoesEntityExist(resourceObjects['wood']) then
+                    Notify(locale('no_wood_planks'), 'error')
+                    return
+                end
+                
+                lib.playAnim(cache.ped, 'amb@prop_human_bum_bin@idle_b', 'idle_d', 8.0, 8.0, 3000, 1, 0, false, false, false)
+                
+                Wait(3000)
+                
+                DeleteEntity(resourceObjects['wood'])
+                resourceObjects['wood'] = nil
+                
+                resourcePickupCounts['wood_plank'].current = resourcePickupCounts['wood_plank'].current + 1
+                
+                TriggerServerEvent('ejj_prison:pickupResource', Config.Crafting.resources.wood.item)
+                ClearPedTasksImmediately(cache.ped)
+                
+                if resourcePickupCounts['wood_plank'].current >= resourcePickupCounts['wood_plank'].max then
+                    self:remove()
+                    resourcePoints.wood = nil
+                else
+                    SetTimeout(Config.Crafting.resources.wood.object.respawnTime, function()
+                        if not resourceObjects['wood'] or not DoesEntityExist(resourceObjects['wood']) then
+                            local object = SpawnObject(Config.Crafting.resources.wood.object.model, Config.Crafting.resources.wood.coords)
+                            SetEntityCollision(object, false, false)
+                            resourceObjects['wood'] = object
+                        end
+                    end)
+                end
+            end
+        end
+    end
+    
+    if resourcePickupCounts['duct_tape'] and resourcePickupCounts['duct_tape'].current < resourcePickupCounts['duct_tape'].max then
+        resourcePoints.ducttape = lib.points.new({
+            coords = vector3(Config.Crafting.resources.ducttape.coords.x, Config.Crafting.resources.ducttape.coords.y, Config.Crafting.resources.ducttape.coords.z),
+            distance = Config.Crafting.resources.ducttape.radius
+        })
+
+        function resourcePoints.ducttape:onEnter()
+            if IsPlayerInJail() and resourceObjects['ducttape'] and DoesEntityExist(resourceObjects['ducttape']) then
+                local remaining = resourcePickupCounts['duct_tape'].max - resourcePickupCounts['duct_tape'].current
+                ShowTextUI(locale('ui_pickup_tape') .. ' (' .. remaining .. ' left)')
+            end
+        end
+
+        function resourcePoints.ducttape:onExit()
+            HideTextUI()
+        end
+
+        function resourcePoints.ducttape:nearby()
+            if IsControlJustReleased(0, 38) then 
+                if not IsPlayerInJail() then
+                    return
+                end
+                
+                if resourcePickupCounts['duct_tape'].current >= resourcePickupCounts['duct_tape'].max then
+                    Notify(locale('resource_limit_reached_tape'), 'error')
+                    return
+                end
+                
+                if not resourceObjects['ducttape'] or not DoesEntityExist(resourceObjects['ducttape']) then
+                    Notify(locale('no_duct_tape'), 'error')
+                    return
+                end
+                
+                lib.playAnim(cache.ped, 'amb@prop_human_bum_bin@idle_b', 'idle_d', 8.0, 8.0, 3000, 1, 0, false, false, false)
+                
+                Wait(3000)
+                
+                DeleteEntity(resourceObjects['ducttape'])
+                resourceObjects['ducttape'] = nil
+                
+                resourcePickupCounts['duct_tape'].current = resourcePickupCounts['duct_tape'].current + 1
+                
+                TriggerServerEvent('ejj_prison:pickupResource', Config.Crafting.resources.ducttape.item)
+                ClearPedTasksImmediately(cache.ped)
+                
+                if resourcePickupCounts['duct_tape'].current >= resourcePickupCounts['duct_tape'].max then
+                    self:remove()
+                    resourcePoints.ducttape = nil
+                else
+                    SetTimeout(Config.Crafting.resources.ducttape.object.respawnTime, function()
+                        if not resourceObjects['ducttape'] or not DoesEntityExist(resourceObjects['ducttape']) then
+                            local object = SpawnObject(Config.Crafting.resources.ducttape.object.model, Config.Crafting.resources.ducttape.coords)
+                            SetEntityCollision(object, false, false)
+                            resourceObjects['ducttape'] = object
+                        end
+                    end)
+                end
+            end
+        end
+    end
+end
+
+function CleanupResourcePoints()
+    for _, point in pairs(resourcePoints) do
+        if point and point.remove then
+            point:remove()
+        end
+    end
+    resourcePoints = {}
+    resourcePickupCounts = {}
 end
 
 local craftingPoint = lib.points.new({
@@ -521,8 +601,6 @@ function HandleCraftingInteraction()
         return
     end
     
-    HideTextUI()
-    
     local inventory = lib.callback.await('ejj_prison:getPlayerInventory', false)
     ShowCraftingMenu(inventory)
 end
@@ -531,21 +609,23 @@ function ShowCraftingMenu(playerInventory)
     local craftingItems = {}
     
     for recipeId, recipe in pairs(Config.Crafting.recipes) do
-        local canCraft = true
         local ingredientText = "Ingredients: "
         local ingredientList = {}
         
         for ingredient, requiredAmount in pairs(recipe.ingredients) do
             local playerAmount = 0
-            if playerInventory[ingredient] then
-                playerAmount = playerInventory[ingredient].count or 0
+            if playerInventory then
+                for _, item in pairs(playerInventory) do
+                    if item and item.name == ingredient then
+                        playerAmount = item.count or 0
+                        break
+                    end
+                end
             end
             
-            table.insert(ingredientList, requiredAmount .. "x " .. (Config.Crafting.resources[ingredient:gsub("_scrap", ""):gsub("_plank", ""):gsub("_tape", "ducttape")] and Config.Crafting.resources[ingredient:gsub("_scrap", ""):gsub("_plank", ""):gsub("_tape", "ducttape")].label or ingredient))
-            
-            if playerAmount < requiredAmount then
-                canCraft = false
-            end
+            local resourceKey = ingredient:gsub("_scrap", ""):gsub("_plank", "wood"):gsub("_tape", "ducttape")
+            local resourceLabel = Config.Crafting.resources[resourceKey] and Config.Crafting.resources[resourceKey].label or ingredient
+            table.insert(ingredientList, requiredAmount .. "x " .. resourceLabel .. " (" .. playerAmount .. "/" .. requiredAmount .. ")")
         end
         
         ingredientText = ingredientText .. table.concat(ingredientList, ", ")
@@ -554,14 +634,12 @@ function ShowCraftingMenu(playerInventory)
             title = recipe.label,
             description = ingredientText,
             icon = recipe.icon,
-            disabled = not canCraft,
             onSelect = function()
-                if canCraft then
-                    TriggerServerEvent('ejj_prison:craftItem', recipeId)
-                    CloseMenu()
-                else
-                    Notify(locale('missing_crafting_ingredients'), 'error')
-                end
+                lib.callback('ejj_prison:craftItem', false, function(success)
+                    if success then
+                        CloseMenu()
+                    end
+                end, recipeId)
             end
         }
     end
@@ -815,7 +893,6 @@ function ClearJobPoints()
 end
 
 function StartCookingWork()
-    HideTextUI()
     TaskStartScenarioInPlace(cache.ped, 'PROP_HUMAN_BBQ', 0, true)
     
     local success = StartMinigame()
@@ -829,7 +906,6 @@ function StartCookingWork()
 end
 
 function StartElectricalWork()
-    HideTextUI()
     TaskStartScenarioInPlace(cache.ped, 'WORLD_HUMAN_WELDING', 0, true)
     
     local success = StartMinigame()
@@ -843,7 +919,6 @@ function StartElectricalWork()
 end
 
 function StartChinupsWork()
-    HideTextUI()
     local coords = Config.Locations.training.chinups
     SetEntityCoords(cache.ped, coords.x, coords.y, coords.z)
     SetEntityHeading(cache.ped, coords.w)
@@ -860,7 +935,6 @@ function StartChinupsWork()
 end
 
 function StartPushupsWork()
-    HideTextUI()
     local coords = Config.Locations.training.pushups
     SetEntityCoords(cache.ped, coords.x, coords.y, coords.z)
     SetEntityHeading(cache.ped, coords.w)
@@ -877,7 +951,6 @@ function StartPushupsWork()
 end
 
 function StartWeightsWork()
-    HideTextUI()
     local coords = Config.Locations.training.weights
     SetEntityCoords(cache.ped, coords.x, coords.y, coords.z)
     SetEntityHeading(cache.ped, coords.w)
@@ -899,7 +972,6 @@ function StartWeightsWork()
 end
 
 function StartSitupsWork()
-    HideTextUI()
     local coords = Config.Locations.training.situps
     SetEntityCoords(cache.ped, coords.x, coords.y, coords.z)
     SetEntityHeading(cache.ped, coords.w)
@@ -988,6 +1060,14 @@ RegisterNetEvent('ejj_prison:syncTunnelState', function(tunnelExists)
             tunnelRockObject = nil
         end
     end
+end)
+
+RegisterNetEvent('ejj_prison:changeToPrisonClothes', function()
+    ChangeClothes("prison")
+end)
+
+RegisterNetEvent('ejj_prison:restoreOriginalClothes', function()
+    ChangeClothes("restore")
 end)
 
 AddEventHandler('onResourceStop', function(resourceName)
