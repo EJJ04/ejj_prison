@@ -131,6 +131,7 @@ function RestorePlayerJail(source)
         SetEntityHeading(GetPlayerPed(source), Config.Locations.jail.w or 0.0)
         
         TriggerClientEvent('ejj_prison:jailStatusChanged', source, true)
+        TriggerClientEvent('ejj_prison:changeToPrisonClothes', source)
         
         TriggerClientEvent('ejj_prison:notify', source, locale('server_returned_to_prison', jailTime), 'info')
     end
@@ -282,6 +283,7 @@ lib.addCommand('jail', {
     SetEntityHeading(GetPlayerPed(targetId), Config.Locations.jail.w or 0.0)
     
     TriggerClientEvent('ejj_prison:jailStatusChanged', targetId, true)
+    TriggerClientEvent('ejj_prison:changeToPrisonClothes', targetId)
     
     TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetId, jailTime), 'success')
     TriggerClientEvent('ejj_prison:notify', targetId, locale('you_were_jailed', jailTime, source), 'error')
@@ -315,6 +317,7 @@ lib.addCommand('unjail', {
     SetEntityHeading(GetPlayerPed(targetId), Config.Locations.release.w or 0.0)
     
     TriggerClientEvent('ejj_prison:jailStatusChanged', targetId, false)
+    TriggerClientEvent('ejj_prison:restoreOriginalClothes', targetId)
     
     TriggerClientEvent('ejj_prison:notify', source, locale('server_player_released', targetId), 'success')
     TriggerClientEvent('ejj_prison:notify', targetId, locale('server_released_by', source), 'success')
@@ -405,6 +408,7 @@ RegisterNetEvent('ejj_prison:jobResult', function(jobType, success)
             SetEntityCoords(GetPlayerPed(source), Config.Locations.release.x, Config.Locations.release.y, Config.Locations.release.z)
             SetEntityHeading(GetPlayerPed(source), Config.Locations.release.w or 0.0)
             TriggerClientEvent('ejj_prison:jailStatusChanged', source, false)
+            TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
             TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_released'), 'success')
         else
             TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_time_reduced', rewardTime, remainingTime), 'success')
@@ -414,6 +418,7 @@ RegisterNetEvent('ejj_prison:jobResult', function(jobType, success)
         SetEntityCoords(GetPlayerPed(source), Config.Locations.release.x, Config.Locations.release.y, Config.Locations.release.z)
         SetEntityHeading(GetPlayerPed(source), Config.Locations.release.w or 0.0)
         TriggerClientEvent('ejj_prison:jailStatusChanged', source, false)
+        TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
         TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_released'), 'success')
     end
 end)
@@ -509,6 +514,7 @@ exports('JailPlayer', function(playerId, jailTime)
     SetEntityCoords(GetPlayerPed(playerId), Config.Locations.jail.x, Config.Locations.jail.y, Config.Locations.jail.z)
     SetEntityHeading(GetPlayerPed(playerId), Config.Locations.jail.w or 0.0)
     
+    TriggerClientEvent('ejj_prison:changeToPrisonClothes', playerId)
     TriggerClientEvent('ejj_prison:notify', playerId, locale('server_jailed_for', jailTime), 'error')
     
     return true
@@ -566,6 +572,7 @@ RegisterNetEvent('ejj_prison:playerEscaped', function()
     escapedPlayers[identifier] = nil 
     
     TriggerClientEvent('ejj_prison:jailStatusChanged', source, false)
+    TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
     
     TriggerPrisonAlarm()
     
@@ -611,22 +618,21 @@ RegisterNetEvent('ejj_prison:pickupResource', function(resourceType)
     end
 end)
 
-RegisterNetEvent('ejj_prison:craftItem', function(recipeId)
-    local source = source
+lib.callback.register('ejj_prison:craftItem', function(source, recipeId)
     local xPlayer = GetPlayer(source)
     
-    if not xPlayer then return end
+    if not xPlayer then return false end
     
     local jailTime = CheckJailTime(source)
     if jailTime <= 0 then
         TriggerClientEvent('ejj_prison:notify', source, locale('server_not_in_jail'), 'error')
-        return
+        return false
     end
     
     local recipe = Config.Crafting.recipes[recipeId]
     if not recipe then
         TriggerClientEvent('ejj_prison:notify', source, locale('server_invalid_recipe'), 'error')
-        return
+        return false
     end
     
     local hasIngredients = true
@@ -640,7 +646,7 @@ RegisterNetEvent('ejj_prison:craftItem', function(recipeId)
     
     if not hasIngredients then
         TriggerClientEvent('ejj_prison:notify', source, locale('server_missing_ingredients'), 'error')
-        return
+        return false
     end
     
     for ingredient, requiredAmount in pairs(recipe.ingredients) do
@@ -650,11 +656,13 @@ RegisterNetEvent('ejj_prison:craftItem', function(recipeId)
     local success = AddItem(source, recipe.result.item, recipe.result.count)
     if success then
         TriggerClientEvent('ejj_prison:notify', source, locale('server_crafted_item', recipe.label), 'success')
+        return true
     else
         TriggerClientEvent('ejj_prison:notify', source, locale('server_inventory_full_craft'), 'error')
         for ingredient, requiredAmount in pairs(recipe.ingredients) do
             AddItem(source, ingredient, requiredAmount)
         end
+        return false
     end
 end)
 
@@ -670,6 +678,7 @@ exports('UnjailPlayer', function(playerId)
     SetEntityCoords(GetPlayerPed(playerId), Config.Locations.release.x, Config.Locations.release.y, Config.Locations.release.z)
     SetEntityHeading(GetPlayerPed(playerId), Config.Locations.release.w or 0.0)
     
+    TriggerClientEvent('ejj_prison:restoreOriginalClothes', playerId)
     TriggerClientEvent('ejj_prison:notify', playerId, locale('server_released_from_jail'), 'success')
     
     return true
