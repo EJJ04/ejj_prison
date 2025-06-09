@@ -320,7 +320,7 @@ function HandleShopInteraction()
     
     ShowMenu({
         id = 'prison_shop_menu',
-        title = locale('ui_prison_shop'),
+        title = locale('prison_shop'),
         items = shopItems
     })
 end
@@ -942,6 +942,7 @@ if Config.PrisonZone.enabled then
         name = Config.PrisonZone.name,
         points = Config.PrisonZone.points,
         thickness = Config.PrisonZone.thickness,
+        debug = Config.Debug,
         onExit = function(self)
             if isDead then
                 return
