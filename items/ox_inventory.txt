@@ -1,0 +1,34 @@
+-- ox_inventory Items for ejj_prison script
+-- Add these to your ox_inventory/data/items.lua file
+
+['metal_scrap'] = {
+    label = 'Metal Scrap',
+    weight = 50,
+    stack = true,
+    close = true,
+    description = 'Pieces of scrap metal found around the prison. Could be useful for crafting.',
+},
+
+['wood_plank'] = {
+    label = 'Wood Plank',
+    weight = 80,
+    stack = true,
+    close = true,
+    description = 'A sturdy wooden plank. Might come in handy for making tools.',
+},
+
+['duct_tape'] = {
+    label = 'Duct Tape',
+    weight = 30,
+    stack = true,
+    close = true,
+    description = 'Heavy-duty duct tape. Perfect for holding things together.',
+},
+
+['shovel'] = {
+    label = 'Shovel',
+    weight = 150,
+    stack = false,
+    close = true,
+    description = 'A makeshift shovel crafted from prison materials. Perfect for... gardening.',
+}, 

@@ -1,0 +1,10 @@
+-- qb-inventory Items for ejj_prison script
+-- Add these to your qb-core/shared/items.lua file
+
+metal_scrap = { name = 'metal_scrap', label = 'Metal Scrap', weight = 50, type = 'item', image = 'metal_scrap.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Pieces of scrap metal found around the prison. Could be useful for crafting.' },
+
+wood_plank = { name = 'wood_plank', label = 'Wood Plank', weight = 80, type = 'item', image = 'wood_plank.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'A sturdy wooden plank. Might come in handy for making tools.' },
+
+duct_tape = { name = 'duct_tape', label = 'Duct Tape', weight = 30, type = 'item', image = 'duct_tape.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'Heavy-duty duct tape. Perfect for holding things together.' },
+
+shovel = { name = 'shovel', label = 'Shovel', weight = 150, type = 'item', image = 'shovel.png', unique = false, useable = false, shouldClose = true, combinable = nil, description = 'A makeshift shovel crafted from prison materials. Perfect for... gardening.' }, 
