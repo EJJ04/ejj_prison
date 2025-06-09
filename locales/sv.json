@@ -30,6 +30,7 @@
   "job_failed": "Du misslyckades. Försök igen!",
   "job_completed_reduced": "%s slutfört! Fängelsestid reducerad med %s minuter. Kvar: %s minuter",
   "job_completed_released": "%s slutfört! Din fängelsestid är klar och du har frigetts.",
+  "job_completed_time_reduced": "Arbete slutfört! Fängelsestid reducerad med %s minuter. Kvar: %s minuter",
   
   "cooking_job": "matlagningsjobb",
   "electrical_work": "elektriskt arbete",

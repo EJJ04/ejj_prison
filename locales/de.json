@@ -30,6 +30,7 @@
   "job_failed": "Du hast es nicht geschafft. Versuche es nochmal!",
   "job_completed_reduced": "%s abgeschlossen! Gefängniszeit um %s Minuten reduziert. Verbleibend: %s Minuten",
   "job_completed_released": "%s abgeschlossen! Deine Gefängniszeit ist beendet und du wurdest entlassen.",
+  "job_completed_time_reduced": "Arbeit abgeschlossen! Gefängniszeit um %s Minuten reduziert. Verbleibend: %s Minuten",
   
   "cooking_job": "Kochjob",
   "electrical_work": "Elektroarbeit",

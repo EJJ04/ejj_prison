@@ -30,6 +30,7 @@
   "job_failed": "You failed. Try again!",
   "job_completed_reduced": "%s completed! Jail time reduced by %s minutes. Remaining: %s minutes",
   "job_completed_released": "%s completed! Your jail time is complete and you have been released.",
+  "job_completed_time_reduced": "Work completed! Jail time reduced by %s minutes. Remaining: %s minutes",
   
   "cooking_job": "cooking job",
   "electrical_work": "electrical work",
