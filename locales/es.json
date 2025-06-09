@@ -26,9 +26,8 @@
   "shovel_broke": "¡Tu pala se ha roto al cavar!",
   "escaped_success": "¡Has escapado de la cárcel con éxito!",
   "escape_prevented": "¡No puedes escapar de la cárcel! Te quedan %s minutos.",
-  
-  "job_selected": "Trabajo seleccionado: %s. Ve al área designada para empezar a trabajar.",
-  "job_failed": "Has fallado en %s. ¡Inténtalo de nuevo!",
+  "job_selected": "Trabajo seleccionado. Ve al área designada para empezar a trabajar.",
+  "job_failed": "Has fallado. ¡Inténtalo de nuevo!",
   "job_completed_reduced": "¡%s completado! Tiempo de cárcel reducido en %s minutos. Restante: %s minutos",
   "job_completed_released": "¡%s completado! Tu tiempo de cárcel ha terminado y has sido liberado.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Gratis para prisioneros",
   
   "menu_prison_guard": "Guardia de la Cárcel",
-  "menu_prison_jobs": "Trabajos de la Cárcel",
   "menu_crafting": "Creación de la Cárcel",
   
-  "skill_check_completed": "¡Prueba de habilidad %s/%s completada!",
+  "skill_check_completed": "¡%s/%s completado!",
   "tunnel_created_log": "Túnel de escape creado por el jugador %s - se reiniciará en %s minutos",
   "tunnel_reset_log": "El túnel de escape ha sido reiniciado - rocas del túnel eliminadas",
   "tunnel_rock_created": "Roca del túnel creada - todos los jugadores pueden escapar ahora",
@@ -127,7 +125,7 @@
   "server_released_by": "Has sido liberado de la cárcel por %s",
   "server_player_jail_time": "Al jugador %s le quedan %s minutos en la cárcel",
   "server_player_not_in_jail": "El jugador %s no está en la cárcel",
-  "server_job_failed": "Has fallado en %s. ¡Inténtalo de nuevo!",
+  "server_job_failed": "Has fallado. ¡Inténtalo de nuevo!",
   "server_received_item": "Has recibido un %s",
   "server_jailed_for": "Has sido encarcelado durante %s minutos",
   "server_escaped_success": "¡Has escapado de la cárcel con éxito! Ahora eres libre.",
@@ -155,10 +153,5 @@
   "job_training": "entrenamiento",
   "job_generic": "trabajo",
   
-  "help_reset_tunnel": "Resetear el túnel de escape (solo admin)",
-  "tunnel_reset_success": "El túnel de escape ha sido reseteado con éxito",
-  "no_tunnel_to_reset": "No hay túnel que resetear",
-  
-  "job_completed_released": "¡Trabajo completado! Tu tiempo de cárcel ha terminado y has sido liberado.",
-  "job_completed_time_reduced": "¡Trabajo completado! Tiempo de cárcel reducido en %s minutos. Restante: %s minutos"
+  "help_reset_tunnel": "Resetear el túnel de escape (solo admin)"
 } 

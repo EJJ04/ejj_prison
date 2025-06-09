@@ -26,9 +26,8 @@
   "shovel_broke": "Deine Schaufel ist beim Graben zerbrochen!",
   "escaped_success": "Du bist erfolgreich aus dem Gefängnis geflohen!",
   "escape_prevented": "Du kannst nicht aus dem Gefängnis fliehen! Du hast noch %s Minuten übrig.",
-  
-  "job_selected": "Job ausgewählt: %s. Gehe zum angegebenen Bereich, um mit der Arbeit zu beginnen.",
-  "job_failed": "Du hast %s nicht geschafft. Versuche es nochmal!",
+  "job_selected": "Job ausgewählt. Gehe zum angegebenen Bereich, um mit der Arbeit zu beginnen.",
+  "job_failed": "Du hast es nicht geschafft. Versuche es nochmal!",
   "job_completed_reduced": "%s abgeschlossen! Gefängniszeit um %s Minuten reduziert. Verbleibend: %s Minuten",
   "job_completed_released": "%s abgeschlossen! Deine Gefängniszeit ist beendet und du wurdest entlassen.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Kostenlos für Gefangene",
   
   "menu_prison_guard": "Gefängniswärter",
-  "menu_prison_jobs": "Gefängnisjobs",
   "menu_crafting": "Gefängnis Herstellung",
   
-  "skill_check_completed": "Geschicklichkeitstest %s/%s abgeschlossen!",
+  "skill_check_completed": "%s/%s abgeschlossen!",
   "tunnel_created_log": "Fluchttunnel von Spieler %s erstellt - wird in %s Minuten zurückgesetzt",
   "tunnel_reset_log": "Fluchttunnel wurde zurückgesetzt - Tunnelsteine entfernt",
   "tunnel_rock_created": "Tunnelstein erstellt - alle Spieler können jetzt fliehen",
@@ -127,7 +125,7 @@
   "server_released_by": "Sie wurden von %s aus dem Gefängnis entlassen",
   "server_player_jail_time": "Spieler %s hat noch %s Minuten im Gefängnis",
   "server_player_not_in_jail": "Spieler %s ist nicht im Gefängnis",
-  "server_job_failed": "Sie haben %s nicht geschafft. Versuchen Sie es nochmal!",
+  "server_job_failed": "Sie haben es nicht geschafft. Versuchen Sie es nochmal!",
   "server_received_item": "Sie haben erhalten: %s",
   "server_jailed_for": "Sie wurden für %s Minuten ins Gefängnis gebracht",
   "server_escaped_success": "Sie sind erfolgreich aus dem Gefängnis geflohen! Sie sind jetzt frei.",
@@ -155,10 +153,5 @@
   "job_training": "Training",
   "job_generic": "Arbeit",
   
-  "help_reset_tunnel": "Fluchttunnel zurücksetzen (nur Admin)",
-  "tunnel_reset_success": "Fluchttunnel wurde erfolgreich zurückgesetzt",
-  "no_tunnel_to_reset": "Es gibt keinen Tunnel zum Zurücksetzen",
-  
-  "job_completed_released": "Arbeit abgeschlossen! Ihre Gefängniszeit ist beendet und Sie wurden entlassen.",
-  "job_completed_time_reduced": "Arbeit abgeschlossen! Gefängniszeit um %s Minuten reduziert. Verbleibend: %s Minuten"
+  "help_reset_tunnel": "Fluchttunnel zurücksetzen (nur Admin)"
 } 

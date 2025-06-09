@@ -26,9 +26,8 @@
   "shovel_broke": "Your shovel broke from digging!",
   "escaped_success": "You have successfully escaped from prison!",
   "escape_prevented": "You cannot escape from prison! You have %s minutes remaining.",
-  
-  "job_selected": "Job selected: %s. Go to the designated area to start working.",
-  "job_failed": "You failed the %s. Try again!",
+  "job_selected": "Job selected. Go to the designated area to start working.",
+  "job_failed": "You failed. Try again!",
   "job_completed_reduced": "%s completed! Jail time reduced by %s minutes. Remaining: %s minutes",
   "job_completed_released": "%s completed! Your jail time is complete and you have been released.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Free for prisoners",
   
   "menu_prison_guard": "Prison Guard",
-  "menu_prison_jobs": "Prison Jobs",
   "menu_crafting": "Prison Crafting",
   
-  "skill_check_completed": "Skill check %s/%s completed!",
+  "skill_check_completed": "%s/%s completed!",
   "tunnel_created_log": "Escape tunnel created by player %s - will reset in %s minutes",
   "tunnel_reset_log": "Escape tunnel has been reset - tunnel rocks removed",
   "tunnel_rock_created": "Tunnel rock created - all players can now escape",
@@ -127,7 +125,7 @@
   "server_released_by": "You have been released from jail by %s",
   "server_player_jail_time": "Player %s has %s minutes remaining in jail",
   "server_player_not_in_jail": "Player %s is not in jail",
-  "server_job_failed": "You failed the %s. Try again!",
+  "server_job_failed": "You failed. Try again!",
   "server_received_item": "You received a %s",
   "server_jailed_for": "You have been jailed for %s minutes",
   "server_escaped_success": "You have successfully escaped prison! You are now free.",
@@ -155,10 +153,5 @@
   "job_training": "training",
   "job_generic": "job",
   
-  "help_reset_tunnel": "Reset the escape tunnel (admin only)",
-  "tunnel_reset_success": "Escape tunnel has been reset successfully",
-  "no_tunnel_to_reset": "There is no tunnel to reset",
-  
-  "job_completed_released": "Work completed! Your jail time is complete and you have been released.",
-  "job_completed_time_reduced": "Work completed! Jail time reduced by %s minutes. Remaining: %s minutes"
+  "help_reset_tunnel": "Reset the escape tunnel (admin only)"
 } 

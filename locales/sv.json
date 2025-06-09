@@ -26,9 +26,8 @@
   "shovel_broke": "Din spade gick sönder när du grävde!",
   "escaped_success": "Du har framgångsrikt flytt från fängelset!",
   "escape_prevented": "Du kan inte fly från fängelset! Du har %s minuter kvar.",
-  
-  "job_selected": "Jobb valt: %s. Gå till det angivna området för att börja arbeta.",
-  "job_failed": "Du misslyckades med %s. Försök igen!",
+  "job_selected": "Jobb valt. Gå till det angivna området för att börja arbeta.",
+  "job_failed": "Du misslyckades. Försök igen!",
   "job_completed_reduced": "%s slutfört! Fängelsestid reducerad med %s minuter. Kvar: %s minuter",
   "job_completed_released": "%s slutfört! Din fängelsestid är klar och du har frigetts.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Gratis för fångar",
   
   "menu_prison_guard": "Fängelsevakt",
-  "menu_prison_jobs": "Fängelsejobb",
   "menu_crafting": "Fängelse Tillverkning",
   
-  "skill_check_completed": "Färdighetstest %s/%s slutfört!",
+  "skill_check_completed": "%s/%s slutfört!",
   "tunnel_created_log": "Flykt-tunnel skapad av spelare %s - återställs om %s minuter",
   "tunnel_reset_log": "Flykt-tunnel har återställts - tunnelstenar borttagna",
   "tunnel_rock_created": "Tunnelsten skapad - alla spelare kan nu fly",
@@ -127,7 +125,7 @@
   "server_released_by": "Du har släppts från fängelset av %s",
   "server_player_jail_time": "Spelare %s har %s minuter kvar i fängelset",
   "server_player_not_in_jail": "Spelare %s är inte i fängelse",
-  "server_job_failed": "Du misslyckades med %s. Försök igen!",
+  "server_job_failed": "Du misslyckades. Försök igen!",
   "server_received_item": "Du fick en %s",
   "server_jailed_for": "Du har fängslats i %s minuter",
   "server_escaped_success": "Du har framgångsrikt flytt från fängelset! Du är nu fri.",
@@ -155,10 +153,5 @@
   "job_training": "träning",
   "job_generic": "jobb",
   
-  "help_reset_tunnel": "Återställ flykttunneln (endast admin)",
-  "tunnel_reset_success": "Flykttunneln har återställts framgångsrikt",
-  "no_tunnel_to_reset": "Det finns ingen tunnel att återställa",
-  
-  "job_completed_released": "Arbete slutfört! Din fängelsetid är klar och du har släppts.",
-  "job_completed_time_reduced": "Arbete slutfört! Fängelsetid reducerad med %s minuter. Återstående: %s minuter"
+  "help_reset_tunnel": "Återställ flykttunneln (endast admin)"
 } 

@@ -26,9 +26,8 @@
   "shovel_broke": "Spaden din gikk i stykker under gravingen!",
   "escaped_success": "Du har rømt fra fengselet med suksess!",
   "escape_prevented": "Du kan ikke rømme fra fengselet! Du har %s minutter igjen.",
-  
-  "job_selected": "Jobb valgt: %s. Gå til det angitte området for å begynne å jobbe.",
-  "job_failed": "Du mislyktes med %s. Prøv igjen!",
+  "job_selected": "Jobb valgt. Gå til det angitte området for å begynne å jobbe.",
+  "job_failed": "Du mislyktes. Prøv igjen!",
   "job_completed_reduced": "%s fullført! Fengselstid redusert med %s minutter. Gjenstående: %s minutter",
   "job_completed_released": "%s fullført! Din fengselstid er ferdig og du har blitt løslatt.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Gratis for fanger",
   
   "menu_prison_guard": "Fengselsvakt",
-  "menu_prison_jobs": "Fengselsjobber",
   "menu_crafting": "Fengsels Håndverk",
   
-  "skill_check_completed": "Ferdighetsjekk %s/%s fullført!",
+  "skill_check_completed": "%s/%s fullført!",
   "tunnel_created_log": "Flukttunnel opprettet av spiller %s - tilbakestilles om %s minutter",
   "tunnel_reset_log": "Flukttunnel har blitt tilbakestilt - tunnelsteiner fjernet",
   "tunnel_rock_created": "Tunnelstein opprettet - alle spillere kan nå rømme",
@@ -127,7 +125,7 @@
   "server_released_by": "Du har blitt løslatt fra fengselet av %s",
   "server_player_jail_time": "Spiller %s har %s minutter igjen i fengselet",
   "server_player_not_in_jail": "Spiller %s er ikke i fengsel",
-  "server_job_failed": "Du mislyktes med %s. Prøv igjen!",
+  "server_job_failed": "Du mislyktes. Prøv igjen!",
   "server_received_item": "Du mottok en %s",
   "server_jailed_for": "Du har blitt fengslet i %s minutter",
   "server_escaped_success": "Du har rømt fra fengselet med suksess! Du er nå fri.",
@@ -155,10 +153,5 @@
   "job_training": "trening",
   "job_generic": "jobb",
   
-  "help_reset_tunnel": "Tilbakestill flukttunnelen (kun admin)",
-  "tunnel_reset_success": "Flukttunnelen har blitt tilbakestilt med suksess",
-  "no_tunnel_to_reset": "Det er ingen tunnel å tilbakestille",
-  
-  "job_completed_released": "Arbeid fullført! Din fengselstid er ferdig og du har blitt løslatt.",
-  "job_completed_time_reduced": "Arbeid fullført! Fengselstid redusert med %s minutter. Gjenstående: %s minutter"
+  "help_reset_tunnel": "Tilbakestill flukttunnelen (kun admin)"
 } 

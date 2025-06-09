@@ -26,9 +26,8 @@
   "shovel_broke": "Din skovl gik i stykker under gravningen!",
   "escaped_success": "Du er flygtet fra fængslet!",
   "escape_prevented": "Du kan ikke flygte fra fængslet! Du har %s minutter tilbage.",
-  
-  "job_selected": "Job valgt: %s. Gå til det udpegede område for at begynde at arbejde.",
-  "job_failed": "Du fejlede %s. Prøv igen!",
+  "job_selected": "Job valgt. Gå til det udpegede område for at begynde at arbejde.",
+  "job_failed": "Du fejlede. Prøv igen!",
   "job_completed_reduced": "%s færdiggjort! Fængsels tid reduceret med %s minutter. Tilbage: %s minutter",
   "job_completed_released": "%s færdiggjort! Din fængsels tid er færdig og du er blevet løsladt.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Gratis for fanger",
   
   "menu_prison_guard": "Fængselsvagt",
-  "menu_prison_jobs": "Fængsels Job",
   "menu_crafting": "Fængsels Fremstilling",
   
-  "skill_check_completed": "Færdighedscheck %s/%s færdiggjort!",
+  "skill_check_completed": "%s/%s færdiggjort!",
   "tunnel_created_log": "Flugtkanal skabt af spiller %s - nulstilles om %s minutter",
   "tunnel_reset_log": "Flugtkanal er blevet nulstillet - tunnel sten fjernet",
   "tunnel_rock_created": "Tunnel sten skabt - alle spillere kan nu flygte",
@@ -127,7 +125,7 @@
   "server_released_by": "Du er blevet løsladt fra fængslet af %s",
   "server_player_jail_time": "Spiller %s har %s minutter tilbage i fængslet",
   "server_player_not_in_jail": "Spiller %s er ikke i fængsel",
-  "server_job_failed": "Du fejlede %s. Prøv igen!",
+  "server_job_failed": "Du fejlede. Prøv igen!",
   "server_received_item": "Du modtog en %s",
   "server_jailed_for": "Du er blevet fængslet i %s minutter",
   "server_escaped_success": "Du er med succes flygtet fra fængslet! Du er nu fri.",
@@ -155,10 +153,5 @@
   "job_training": "træning",
   "job_generic": "job",
   
-  "help_reset_tunnel": "Nulstil flugttunnelen (kun admin)",
-  "tunnel_reset_success": "Flugttunnelen er blevet nulstillet med succes",
-  "no_tunnel_to_reset": "Der er ingen tunnel at nulstille",
-  
-  "job_completed_released": "Arbejde fuldført! Din fængselstid er færdig og du er blevet løsladt.",
-  "job_completed_time_reduced": "Arbejde fuldført! Fængselstid reduceret med %s minutter. Tilbage: %s minutter"
+  "help_reset_tunnel": "Nulstil flugttunnelen (kun admin)"
 } 

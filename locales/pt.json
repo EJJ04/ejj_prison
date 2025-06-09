@@ -26,9 +26,8 @@
   "shovel_broke": "Sua pá quebrou ao cavar!",
   "escaped_success": "Você escapou da prisão com sucesso!",
   "escape_prevented": "Você não pode escapar da prisão! Você tem %s minutos restantes.",
-  
-  "job_selected": "Trabalho selecionado: %s. Vá para a área designada para começar a trabalhar.",
-  "job_failed": "Você falhou no %s. Tente novamente!",
+  "job_selected": "Trabalho selecionado. Vá para a área designada para começar a trabalhar.",
+  "job_failed": "Você falhou. Tente novamente!",
   "job_completed_reduced": "%s concluído! Tempo de prisão reduzido em %s minutos. Restante: %s minutos",
   "job_completed_released": "%s concluído! Seu tempo de prisão acabou e você foi solto.",
   
@@ -91,10 +90,9 @@
   "shop_item_free": "Grátis para prisioneiros",
   
   "menu_prison_guard": "Guarda da Prisão",
-  "menu_prison_jobs": "Trabalhos da Prisão",
   "menu_crafting": "Criação da Prisão",
   
-  "skill_check_completed": "Teste de habilidade %s/%s concluído!",
+  "skill_check_completed": "%s/%s concluído!",
   "tunnel_created_log": "Túnel de fuga criado pelo jogador %s - será resetado em %s minutos",
   "tunnel_reset_log": "Túnel de fuga foi resetado - pedras do túnel removidas",
   "tunnel_rock_created": "Pedra do túnel criada - todos os jogadores podem escapar agora",
@@ -127,7 +125,7 @@
   "server_released_by": "Você foi solto da prisão por %s",
   "server_player_jail_time": "Jogador %s tem %s minutos restantes na prisão",
   "server_player_not_in_jail": "Jogador %s não está na prisão",
-  "server_job_failed": "Você falhou no %s. Tente novamente!",
+  "server_job_failed": "Você falhou. Tente novamente!",
   "server_received_item": "Você recebeu um %s",
   "server_jailed_for": "Você foi preso por %s minutos",
   "server_escaped_success": "Você escapou da prisão com sucesso! Você está livre agora.",
@@ -155,10 +153,5 @@
   "job_training": "treinamento",
   "job_generic": "trabalho",
   
-  "help_reset_tunnel": "Resetar o túnel de fuga (apenas admin)",
-  "tunnel_reset_success": "Túnel de fuga foi resetado com sucesso",
-  "no_tunnel_to_reset": "Não há túnel para resetar",
-  
-  "job_completed_released": "Trabalho concluído! Seu tempo de prisão terminou e você foi solto.",
-  "job_completed_time_reduced": "Trabalho concluído! Tempo de prisão reduzido em %s minutos. Restante: %s minutos"
+  "help_reset_tunnel": "Resetar o túnel de fuga (apenas admin)"
 } 
