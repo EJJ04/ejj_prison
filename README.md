@@ -2,6 +2,8 @@
 
 A comprehensive FiveM prison system with escape mechanics, job system, crafting, and full localization support.
 
+[Preview](https://www.youtube.com/watch?v=WI-oBlH4i0o&ab_channel=EJJ04)
+
 ## Features
 
 - **Complete Prison System**: Jail/unjail players with time-based sentences
