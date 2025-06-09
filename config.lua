@@ -30,6 +30,25 @@ Config.Guard = {
     radius = 3.0 -- How close players need to be to interact with him
 }
 
+-- Prison outfit configuration - what players wear when jailed
+Config.PrisonClothes = {
+    male = {
+        { component_id = 3, drawable = 5, texture = 0 },   -- Arms
+        { component_id = 4, drawable = 7, texture = 0 },   -- Pants
+        { component_id = 6, drawable = 1, texture = 0 },   -- Shoes
+        { component_id = 8, drawable = 15, texture = 0 },  -- Undershirt
+        { component_id = 11, drawable = 5, texture = 2 }   -- Torso 
+    },
+    female = {
+        { component_id = 3, drawable = 14, texture = 0 },   -- Arms
+        { component_id = 4, drawable = 2, texture = 7 },   -- Pants 
+        { component_id = 6, drawable = 49, texture = 0 },   -- Shoes 
+        { component_id = 8, drawable = 15, texture = 0 },   -- Undershirt
+        { component_id = 11, drawable = 73, texture = 7 }   -- Torso 
+    },
+    hat = { component_id = 0, drawable = -1, texture = 0 } -- No hat for prisoners
+}
+
 -- All the important locations in the prison - change these if you're using a different prison interior
 Config.Locations = {
     jail = vector4(1769.2166, 2552.5620, 45.5650, 0.0), -- Where players spawn when they get jailed
@@ -232,7 +251,7 @@ Config.Crafting = {
             object = false -- No physical object spawns (invisible pickup)
         },
         wood = { -- Wood planks
-            coords = vector4(1690.255, 2553.248, 45.268, 90.129), -- Where to find wood
+            coords = vector4(1690.255, 2553.248, 44.268, 90.129), -- Where to find wood
             radius = 1.5,
             item = 'wood_plank',
             label = 'Wood Plank',
@@ -259,7 +278,7 @@ Config.Crafting = {
             label = 'Prison Shovel', -- What it's called
             icon = 'fas fa-shovel', -- Shovel icon
             ingredients = { -- What you need to make it
-                metal_scrap = 2, -- 2 metal scraps
+                metal_scrap = 1, -- 2 metal scraps
                 wood_plank = 1, -- 1 wood plank
                 duct_tape = 1 -- 1 duct tape
             },
