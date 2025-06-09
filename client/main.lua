@@ -9,7 +9,8 @@ local tunnelRockObject = nil
 local exitRockObject = nil 
 local hasEscaped = false 
 local lastJobSelectionTime = 0 
-local isDead = false 
+local isDead = false
+local completedElectricalBoxes = {} 
 
 RegisterNetEvent('ejj_prison:notify', function(message, type)
     Notify(message, type)
@@ -26,6 +27,7 @@ RegisterNetEvent('ejj_prison:jailStatusChanged', function(isJailed)
         currentJob = nil
         ClearJobPoints()
         isDead = false
+        completedElectricalBoxes = {}
     end
 end)
 
@@ -669,7 +671,7 @@ function SelectJob(jobType)
     currentJob = jobType
     lastJobSelectionTime = currentTime 
     CreateJobPoints(jobType)
-    Notify(locale('job_selected', locale(jobType .. '_job')), 'success')
+            Notify(locale('job_selected'), 'success')
 end
 
 function CreateJobPoints(jobType)
@@ -716,16 +718,18 @@ function CreateJobPoints(jobType)
                     distance = Config.JobZones.electrician.radius
                 })
                 
+                point.boxIndex = i
+                point.blip = blip
+                
                 function point:onEnter()
-                    ShowTextUI(locale('ui_fix_electrical'))
-                    if blip and DoesBlipExist(blip) then
-                        RemoveBlip(blip)
+                    if not completedElectricalBoxes[self.boxIndex] then
+                        ShowTextUI(locale('ui_fix_electrical'))
                     end
                 end
                 
                 function point:nearby()
-                    if IsControlJustReleased(0, 38) then 
-                        StartElectricalWork()
+                    if IsControlJustReleased(0, 38) and not completedElectricalBoxes[self.boxIndex] then 
+                        StartElectricalWork(self.boxIndex, self.blip)
                     end
                 end
                 
@@ -890,6 +894,8 @@ function ClearJobPoints()
     jobPoints = {}
     ClearJobBlips()
     HideTextUI()
+    
+    completedElectricalBoxes = {}
 end
 
 function StartCookingWork()
@@ -905,16 +911,38 @@ function StartCookingWork()
     end
 end
 
-function StartElectricalWork()
+function StartElectricalWork(boxIndex, blip)
     TaskStartScenarioInPlace(cache.ped, 'WORLD_HUMAN_WELDING', 0, true)
     
     local success = StartMinigame()
-    TriggerServerEvent('ejj_prison:jobResult', 'electrician', success)
     
     ClearPedTasksImmediately(cache.ped)
+    
     if success then
-        ClearJobPoints()
-        currentJob = nil
+        completedElectricalBoxes[boxIndex] = true
+        
+        if blip and DoesBlipExist(blip) then
+            RemoveBlip(blip)
+        end
+        
+        local totalBoxes = #Config.Locations.electrical
+        local completedCount = 0
+        for i = 1, totalBoxes do
+            if completedElectricalBoxes[i] then
+                completedCount = completedCount + 1
+            end
+        end
+        
+        if completedCount >= totalBoxes then
+            TriggerServerEvent('ejj_prison:jobResult', 'electrician', true)
+            ClearJobPoints()
+            currentJob = nil
+            Notify(locale('skill_check_completed', completedCount, totalBoxes), 'success')
+        else
+            Notify(locale('skill_check_completed', completedCount, totalBoxes), 'info')
+        end
+    else
+        Notify(locale('job_failed'), 'error')
     end
 end
 
