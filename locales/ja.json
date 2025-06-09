@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] 金属くずを拾う",
   "ui_pickup_wood": "[E] 木材を拾う",
   "ui_pickup_tape": "[E] ダクトテープを拾う",
+  "resource_limit_reached_metal": "金属くずは十分に集めました",
+  "resource_limit_reached_wood": "木材は十分に集めました",
+  "resource_limit_reached_tape": "ダクトテープは十分に集めました",
   "ui_talk_prisoner": "[E] 囚人と話す",
   
   "blip_electrical_box": "電気ボックス #%s",

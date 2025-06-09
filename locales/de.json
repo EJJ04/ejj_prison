@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] Metallschrott aufheben",
   "ui_pickup_wood": "[E] Holzplanke aufheben",
   "ui_pickup_tape": "[E] Klebeband aufheben",
+  "resource_limit_reached_metal": "Du hast bereits genug Metallschrott gesammelt",
+  "resource_limit_reached_wood": "Du hast bereits genug Holzplanken gesammelt",
+  "resource_limit_reached_tape": "Du hast bereits genug Klebeband gesammelt",
   "ui_talk_prisoner": "[E] Mit Gefangenem sprechen",
   
   "blip_electrical_box": "Elektrokasten #%s",

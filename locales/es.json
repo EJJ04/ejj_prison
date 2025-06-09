@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] Recoger Chatarra Metálica",
   "ui_pickup_wood": "[E] Recoger Tabla de Madera",
   "ui_pickup_tape": "[E] Recoger Cinta Adhesiva",
+  "resource_limit_reached_metal": "Ya has recogido suficiente chatarra metálica",
+  "resource_limit_reached_wood": "Ya has recogido suficientes tablas de madera",
+  "resource_limit_reached_tape": "Ya has recogido suficiente cinta adhesiva",
   "ui_talk_prisoner": "[E] Hablar con Prisionero",
   
   "blip_electrical_box": "Caja Eléctrica #%s",

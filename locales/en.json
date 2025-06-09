@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] Pick up Metal Scrap",
   "ui_pickup_wood": "[E] Pick up Wood Plank",
   "ui_pickup_tape": "[E] Pick up Duct Tape",
+  "resource_limit_reached_metal": "You have already collected enough metal scraps",
+  "resource_limit_reached_wood": "You have already collected enough wood planks", 
+  "resource_limit_reached_tape": "You have already collected enough duct tape",
   "ui_talk_prisoner": "[E] Talk to Prisoner",
   
   "blip_electrical_box": "Electrical Box #%s",

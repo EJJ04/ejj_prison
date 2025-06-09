@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] Plukk opp Metallskrap",
   "ui_pickup_wood": "[E] Plukk opp Treplanke",
   "ui_pickup_tape": "[E] Plukk opp Tape",
+  "resource_limit_reached_metal": "Du har allerede samlet nok metallskrap",
+  "resource_limit_reached_wood": "Du har allerede samlet nok treplanker",
+  "resource_limit_reached_tape": "Du har allerede samlet nok tape",
   "ui_talk_prisoner": "[E] Snakk med Fange",
   
   "blip_electrical_box": "Elektrisk Boks #%s",

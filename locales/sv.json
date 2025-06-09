@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] Plocka upp Metallskrot",
   "ui_pickup_wood": "[E] Plocka upp Träplanka",
   "ui_pickup_tape": "[E] Plocka upp Tejp",
+  "resource_limit_reached_metal": "Du har redan samlat tillräckligt med metallskrot",
+  "resource_limit_reached_wood": "Du har redan samlat tillräckligt med träplankor",
+  "resource_limit_reached_tape": "Du har redan samlat tillräckligt med tejp",
   "ui_talk_prisoner": "[E] Prata med Fånge",
   
   "blip_electrical_box": "Ellåda #%s",

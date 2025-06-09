@@ -70,6 +70,9 @@
   "ui_pickup_metal": "[E] Pegar Sucata de Metal",
   "ui_pickup_wood": "[E] Pegar Tábua de Madeira",
   "ui_pickup_tape": "[E] Pegar Fita Adesiva",
+  "resource_limit_reached_metal": "Você já coletou sucata de metal suficiente",
+  "resource_limit_reached_wood": "Você já coletou tábuas de madeira suficientes",
+  "resource_limit_reached_tape": "Você já coletou fita adesiva suficiente",
   "ui_talk_prisoner": "[E] Falar com Prisioneiro",
   
   "blip_electrical_box": "Caixa Elétrica #%s",
