@@ -378,12 +378,7 @@ RegisterNetEvent('ejj_prison:jobResult', function(jobType, success)
     end
     
     if not success then
-        local jobNames = {
-            cooking = locale('job_cooking'),
-            electrician = locale('job_electrician'),
-            training = locale('job_training')
-        }
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_job_failed', jobNames[jobType] or locale('job_generic')), 'error')
+        TriggerClientEvent('ejj_prison:notify', source, locale('server_job_failed'), 'error')
         return
     end
     
