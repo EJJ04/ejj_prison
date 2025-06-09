@@ -1092,15 +1092,11 @@ AddEventHandler('esx:onPlayerDeath', function(data)
     end
 end)
 
-RegisterNetEvent('hospital:server:SetDeathStatus', function(deathStatus)
+AddEventHandler('esx:onPlayerSpawn', function()
     local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
     if jailTime > 0 then
-        if deathStatus then
-            isDead = true
-        else
-            isDead = false
-            TeleportToPrisonHospital()
-        end
+        isDead = false
+        TeleportToPrisonHospital()
     end
 end)
 
