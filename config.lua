@@ -38,8 +38,9 @@ Config.Locations = {
     cooking = vector3(1780.8937, 2564.2419, 45.6731), -- Kitchen job location
     electrical = { -- Multiple electrical box locations around the prison
         vector3(1761.5, 2540.8, 45.67),
-        vector3(1772.3, 2564.1, 45.67),
-        vector3(1785.2, 2566.9, 45.67)
+        vector3(1718.4652, 2527.7903, 45.5648),
+        vector3(1664.8314, 2501.6807, 45.5648),
+        vector3(1627.8918, 2538.4287, 45.5648)
     },
     training = { -- Different workout equipment locations in the gym
         chinups = vector4(1746.5942, 2481.6499, 45.7407, 118.2180),
