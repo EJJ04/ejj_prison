@@ -16,9 +16,10 @@ Config.TextUI = 'ox_lib'
 Config.TextUIPosition = 'left-center'
 
 -- Which menu system to use for interactions like the shop and crafting
+-- Options: 'ox_lib' (modern, recommended), 'esx' (ESX context menus), 'qb' (QB menu system)
 Config.Menu = 'ox_lib'
 
--- How should we display jail time? 'minutes' is probably what you want
+-- How should we display jail time? Options: 'minutes' (recommended), 'hours', 'seconds'
 Config.TimeFormat = 'minutes'
 
 -- How many skill checks do players need to complete for jobs? 3 seems fair - not too easy, not too hard
