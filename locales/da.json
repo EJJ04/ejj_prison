@@ -29,7 +29,7 @@
   "job_selected": "Job valgt. Gå til det udpegede område for at begynde at arbejde.",
   "job_failed": "Du fejlede. Prøv igen!",
   "job_completed_reduced": "%s færdiggjort! Fængsels tid reduceret med %s minutter. Tilbage: %s minutter",
-  "job_completed_released": "%s færdiggjort! Din fængsels tid er færdig og du er blevet løsladt.",
+      "job_completed_released": "Arbejde færdiggjort! Din fængsels tid er færdig og du er blevet løsladt.",
   "job_completed_time_reduced": "Arbejde færdiggjort! Fængsels tid reduceret med %s minutter. Tilbage: %s minutter",
   
   "cooking_job": "madlavningsjob",

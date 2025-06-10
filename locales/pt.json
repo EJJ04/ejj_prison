@@ -29,7 +29,7 @@
   "job_selected": "Trabalho selecionado. Vá para a área designada para começar a trabalhar.",
   "job_failed": "Você falhou. Tente novamente!",
   "job_completed_reduced": "%s concluído! Tempo de prisão reduzido em %s minutos. Restante: %s minutos",
-  "job_completed_released": "%s concluído! Seu tempo de prisão acabou e você foi solto.",
+      "job_completed_released": "Trabalho concluído! Seu tempo de prisão acabou e você foi solto.",
   "job_completed_time_reduced": "Trabalho concluído! Tempo de prisão reduzido em %s minutos. Restante: %s minutos",
   
   "cooking_job": "trabalho de cozinha",

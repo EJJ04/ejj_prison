@@ -29,7 +29,7 @@
   "job_selected": "仕事を選択しました。指定されたエリアに行って作業を開始してください。",
   "job_failed": "失敗しました。もう一度試してください！",
   "job_completed_reduced": "%s 完了！収監時間が %s 分短縮されました。残り: %s 分",
-  "job_completed_released": "%s 完了！収監時間が終了し、釈放されました。",
+      "job_completed_released": "作業完了！収監時間が終了し、釈放されました。",
   "job_completed_time_reduced": "作業完了！収監時間が %s 分短縮されました。残り: %s 分",
   
   "cooking_job": "料理の仕事",
