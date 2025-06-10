@@ -19,21 +19,58 @@ end
 
 function StartMinigame()
     local totalTries = Config.MinigameTries or 1
-    local difficulties = {'easy', 'medium', 'hard'}
     
-    for i = 1, totalTries do
-        local success = lib.skillCheck(difficulties)
+    if Config.Minigame == 'ox_lib' then
+        -- Using ox_lib skillCheck
+        local difficulties = {'easy', 'medium', 'hard'}
         
-        if not success then
-            return false 
+        for i = 1, totalTries do
+            local success = lib.skillCheck(difficulties)
+            
+            if not success then
+                return false 
+            end
+            
+            if i < totalTries then
+                Wait(500)
+            end
         end
         
-        if i < totalTries then
-            Wait(500)
+        return true
+        
+    elseif Config.Minigame == 'qb' then
+        for i = 1, totalTries do
+            local difficulty = 'medium'
+            local keys = 'wasd'
+            local success = exports['qb-minigames']:Skillbar(difficulty, keys)
+            
+            if not success then
+                return false
+            end
+            
+            if i < totalTries then
+                Wait(500)
+            end
         end
+        
+        return true
+    else
+        local difficulties = {'easy', 'medium', 'hard'}
+        
+        for i = 1, totalTries do
+            local success = lib.skillCheck(difficulties)
+            
+            if not success then
+                return false 
+            end
+            
+            if i < totalTries then
+                Wait(500)
+            end
+        end
+        
+        return true
     end
-    
-    return true 
 end
 
 function PoliceDispatch(data)
@@ -191,14 +228,27 @@ function IsPlayerInJail()
     return jailTime > 0
 end
 
-function Notify(message, type)
+function Notify(message, type, length)
     if Config.Notify == 'ox_lib' then
         lib.notify({
             description = message,
             type = type
         })
     elseif Config.Notify == 'qb' then
-        QBCore.Functions.Notify(message, type)
+        local qbType = type or 'primary'
+        if type == 'info' then
+            qbType = 'primary'
+        elseif type == 'warn' then
+            qbType = 'warning'
+        elseif type == 'success' then
+            qbType = 'success'
+        elseif type == 'error' then
+            qbType = 'error'
+        else
+            qbType = 'primary'
+        end
+        
+        QBCore.Functions.Notify(message, qbType, length or 5000)
     elseif Config.Notify == 'esx' then
         ESX.ShowNotification(message)
     end
@@ -360,12 +410,20 @@ end
 function ShowQBMenu(options)
     local menuData = {}
     
+    if options.title then
+        table.insert(menuData, {
+            header = options.title,
+            isMenuHeader = true,
+            txt = ""
+        })
+    end
+    
     for _, option in ipairs(options.items) do
         local menuItem = {
-            header = option.title,
-            txt = option.description,
+            header = option.title or "",
+            txt = option.description or "",
             icon = option.icon,
-            isMenuHeader = option.isHeader or false,
+            isMenuHeader = false,
             disabled = option.disabled or false,
             hidden = option.hidden or false
         }
@@ -377,18 +435,26 @@ function ShowQBMenu(options)
         elseif option.event or option.serverEvent then
             menuItem.params = {
                 event = option.event or option.serverEvent,
-                args = option.args,
+                args = option.args or {},
                 isServer = option.serverEvent and true or false,
-                isCommand = option.isCommand or false,
-                isQBCommand = option.isQBCommand or false,
-                isAction = option.isAction or false
+                isCommand = false,
+                isQBCommand = false,
+                isAction = false
             }
         end
         
         table.insert(menuData, menuItem)
     end
     
-    exports['qb-menu']:openMenu(menuData, options.sort or false, options.skipFirst or false)
+    table.insert(menuData, {
+        header = "Close",
+        icon = "fas fa-times",
+        params = {
+            event = "qb-menu:closeMenu"
+        }
+    })
+    
+    exports['qb-menu']:openMenu(menuData)
 end
 
 function CloseMenu()
@@ -457,7 +523,6 @@ function ChangeClothes(type)
             ClearPedProp(cache.ped, 0)
         end
         
-        -- Try common appearance system events
         TriggerEvent("fivem-appearance:client:reloadSkin")
         TriggerEvent("fivem-appearance:ReloadSkin")
         TriggerEvent("illenium-appearance:client:reloadSkin")

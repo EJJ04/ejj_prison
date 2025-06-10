@@ -12,6 +12,7 @@ local lastJobSelectionTime = 0
 local isDead = false
 local completedElectricalBoxes = {} 
 local prisonBlip = nil
+local shopBlip = nil
 
 RegisterNetEvent('ejj_prison:notify', function(message, type)
     Notify(message, type)
@@ -21,6 +22,7 @@ RegisterNetEvent('ejj_prison:jailStatusChanged', function(isJailed)
     if isJailed then
         SpawnResourceObjects()
         InitializeResourceSystem()
+        CreateShopBlip()
     else
         CleanupResourceObjects()
         CleanupResourcePoints() 
@@ -29,6 +31,7 @@ RegisterNetEvent('ejj_prison:jailStatusChanged', function(isJailed)
         ClearJobPoints()
         isDead = false
         completedElectricalBoxes = {}
+        RemoveShopBlip()
     end
 end)
 
@@ -1114,6 +1117,7 @@ AddEventHandler('onResourceStop', function(resourceName)
         if prisonBlip and DoesBlipExist(prisonBlip) then
             RemoveBlip(prisonBlip)
         end
+        RemoveShopBlip()
     end
 end)
 
@@ -1162,6 +1166,29 @@ function CreatePrisonBlip()
     BeginTextCommandSetBlipName('STRING')
     AddTextComponentString(Config.Locations.blip.name)
     EndTextCommandSetBlipName(prisonBlip)
+end
+
+function CreateShopBlip()
+    if shopBlip and DoesBlipExist(shopBlip) then
+        RemoveBlip(shopBlip)
+    end
+    
+    local coords = Config.Shop.ped.coords
+    shopBlip = AddBlipForCoord(coords.x, coords.y, coords.z)
+    SetBlipSprite(shopBlip, Config.Shop.blip.sprite)
+    SetBlipColour(shopBlip, Config.Shop.blip.color)
+    SetBlipScale(shopBlip, Config.Shop.blip.scale)
+    SetBlipAsShortRange(shopBlip, true)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentString(Config.Shop.blip.name)
+    EndTextCommandSetBlipName(shopBlip)
+end
+
+function RemoveShopBlip()
+    if shopBlip and DoesBlipExist(shopBlip) then
+        RemoveBlip(shopBlip)
+        shopBlip = nil
+    end
 end
 
 CreatePrisonBlip()
