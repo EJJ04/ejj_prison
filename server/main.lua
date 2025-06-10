@@ -62,13 +62,11 @@ function CheckJailTime(source)
     return 0
 end
 
--- Create lookup table for kept items (O(1) access instead of O(n) loops)
 local keptItemsLookup = {}
 for _, itemName in pairs(Config.KeepItemsOnJail) do
     keptItemsLookup[itemName] = true
 end
 
--- Separate item filtering logic
 local function FilterPlayerItems(inventory)
     local itemsToRemove = {}
     local itemsToKeep = {}
@@ -76,10 +74,8 @@ local function FilterPlayerItems(inventory)
     for slot, item in pairs(inventory) do
         if item and item.name and item.count and item.count > 0 then
             if keptItemsLookup[item.name] then
-                -- Item should be kept - add to kept items
                 itemsToKeep[slot] = item
             else
-                -- Item should be removed - add to removal list
                 table.insert(itemsToRemove, {slot = slot, item = item})
             end
         end
