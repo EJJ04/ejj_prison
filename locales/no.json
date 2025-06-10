@@ -154,5 +154,10 @@
   "job_training": "trening",
   "job_generic": "jobb",
   
-  "help_reset_tunnel": "Tilbakestill flukttunnelen (kun admin)"
+  "help_reset_tunnel": "Tilbakestill flukttunnel (kun admin)",
+  
+  "server_served_offline_time": "Du sonet din fulle fengselsstraff offline og har blitt løslatt!",
+  "server_offline_time_served": "Du sonet %s minutter offline. Gjenværende tid: %s minutter",
+  
+  "server_items_kept_on_jail": "Du har fått lov til å beholde visse personlige gjenstander under fengslingen"
 } 

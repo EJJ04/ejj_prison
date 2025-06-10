@@ -154,5 +154,10 @@
   "job_training": "treinamento",
   "job_generic": "trabalho",
   
-  "help_reset_tunnel": "Resetar o túnel de fuga (apenas admin)"
+  "help_reset_tunnel": "Redefinir túnel de fuga (somente admin)",
+  
+  "server_served_offline_time": "Você cumpriu sua sentença completa de prisão offline e foi libertado!",
+  "server_offline_time_served": "Você cumpriu %s minutos offline. Tempo restante: %s minutos",
+  
+  "server_items_kept_on_jail": "Você foi autorizado a manter certos itens pessoais durante seu aprisionamento"
 } 

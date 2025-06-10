@@ -154,5 +154,10 @@
   "job_training": "Training",
   "job_generic": "Arbeit",
   
-  "help_reset_tunnel": "Fluchttunnel zurücksetzen (nur Admin)"
+  "help_reset_tunnel": "Flucht-Tunnel zurücksetzen (nur Admin)",
+  
+  "server_served_offline_time": "Du hast deine vollständige Gefängnisstrafe offline abgesessen und wurdest freigelassen!",
+  "server_offline_time_served": "Du hast %s Minuten offline abgesessen. Verbleibende Zeit: %s Minuten",
+  
+  "server_items_kept_on_jail": "Du durftest bestimmte persönliche Gegenstände während deiner Haftzeit behalten"
 } 

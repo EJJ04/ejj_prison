@@ -154,5 +154,10 @@
   "job_training": "訓練",
   "job_generic": "仕事",
   
-  "help_reset_tunnel": "脱獄トンネルをリセット（管理者のみ）"
+  "help_reset_tunnel": "脱獄トンネルをリセット（管理者のみ）",
+  
+  "server_served_offline_time": "オフライン中に刑期を満了し、釈放されました！",
+  "server_offline_time_served": "オフライン中に%s分服役しました。残り時間：%s分",
+  
+  "server_items_kept_on_jail": "収監中も特定の個人的な所持品の保持が許可されました"
 } 

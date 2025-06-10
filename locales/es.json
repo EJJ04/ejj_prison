@@ -154,5 +154,10 @@
   "job_training": "entrenamiento",
   "job_generic": "trabajo",
   
-  "help_reset_tunnel": "Resetear el túnel de escape (solo admin)"
+  "help_reset_tunnel": "Restablecer túnel de escape (solo admin)",
+  
+  "server_served_offline_time": "¡Cumpliste tu sentencia completa de prisión offline y has sido liberado!",
+  "server_offline_time_served": "Cumpliste %s minutos offline. Tiempo restante: %s minutos",
+  
+  "server_items_kept_on_jail": "Se te ha permitido conservar ciertos objetos personales durante tu encarcelamiento"
 } 

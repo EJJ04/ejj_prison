@@ -154,5 +154,10 @@
   "job_training": "träning",
   "job_generic": "jobb",
   
-  "help_reset_tunnel": "Återställ flykttunneln (endast admin)"
+  "help_reset_tunnel": "Återställ flykttunnel (endast admin)",
+  
+  "server_served_offline_time": "Du avtjänade din fullständiga fängelsestraff offline och har släppts!",
+  "server_offline_time_served": "Du avtjänade %s minuter offline. Återstående tid: %s minuter",
+  
+  "server_items_kept_on_jail": "Du har fått behålla vissa personliga föremål under din fängelse"
 } 

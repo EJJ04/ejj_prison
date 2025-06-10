@@ -4,7 +4,7 @@
   "jail_param_time": "Fængsels tid i minutter",
   "unjail_command_help": "Løslader en spiller",
   "unjail_param_id": "Spiller ID",
-  "jailstatus_command_help": "Tjekker en spillers fængselsstatus",
+  "jailstatus_command_help": "Tjekkers en spillers fængselsstatus",
   "jailstatus_param_id": "Spiller ID",
   "resettunnel_command_help": "Nulstiller flugtkanalen (kun admin)",
   
@@ -154,5 +154,10 @@
   "job_training": "træning",
   "job_generic": "job",
   
-  "help_reset_tunnel": "Nulstil flugttunnelen (kun admin)"
+  "help_reset_tunnel": "Nulstil flugtunnelen (kun admin)",
+  
+  "server_served_offline_time": "Du afsonede din fulde fængselsstraf offline og er blevet løsladt!",
+  "server_offline_time_served": "Du afsonede %s minutter offline. Resterende tid: %s minutter",
+  
+  "server_items_kept_on_jail": "Du har fået lov til at beholde visse personlige ejendele under din fængsling"
 } 

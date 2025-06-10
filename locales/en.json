@@ -154,5 +154,10 @@
   "job_training": "training",
   "job_generic": "job",
   
-  "help_reset_tunnel": "Reset the escape tunnel (admin only)"
+  "help_reset_tunnel": "Reset the escape tunnel (admin only)",
+  
+  "server_served_offline_time": "You served your full prison sentence while offline and have been released!",
+  "server_offline_time_served": "You served %s minutes offline. Remaining time: %s minutes",
+  
+  "server_items_kept_on_jail": "You have been allowed to keep certain personal items during your imprisonment"
 } 
