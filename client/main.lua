@@ -11,6 +11,7 @@ local hasEscaped = false
 local lastJobSelectionTime = 0 
 local isDead = false
 local completedElectricalBoxes = {} 
+local prisonBlip = nil
 
 RegisterNetEvent('ejj_prison:notify', function(message, type)
     Notify(message, type)
@@ -1110,6 +1111,9 @@ AddEventHandler('onResourceStop', function(resourceName)
         if prisonZone then
             prisonZone:remove()
         end
+        if prisonBlip and DoesBlipExist(prisonBlip) then
+            RemoveBlip(prisonBlip)
+        end
     end
 end)
 
@@ -1139,6 +1143,28 @@ RegisterNetEvent('ejj_prison:setDeathStatus', function(deathStatus)
         end
     end
 end)
+
+function CreatePrisonBlip()
+    if not Config.Locations.blip.enabled then
+        return
+    end
+    
+    if prisonBlip and DoesBlipExist(prisonBlip) then
+        RemoveBlip(prisonBlip)
+    end
+    
+    local coords = Config.Locations.blip.coords
+    prisonBlip = AddBlipForCoord(coords.x, coords.y, coords.z)
+    SetBlipSprite(prisonBlip, Config.Locations.blip.sprite)
+    SetBlipColour(prisonBlip, Config.Locations.blip.color)
+    SetBlipScale(prisonBlip, Config.Locations.blip.scale)
+    SetBlipAsShortRange(prisonBlip, Config.Locations.blip.shortRange)
+    BeginTextCommandSetBlipName('STRING')
+    AddTextComponentString(Config.Locations.blip.name)
+    EndTextCommandSetBlipName(prisonBlip)
+end
+
+CreatePrisonBlip()
 
 exports('JailPlayer', function(playerId, jailTime)
     if not IsPlayerPolice() then
