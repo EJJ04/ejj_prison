@@ -62,41 +62,50 @@ function CheckJailTime(source)
     return 0
 end
 
+-- Create lookup table for kept items (O(1) access instead of O(n) loops)
+local keptItemsLookup = {}
+for _, itemName in pairs(Config.KeepItemsOnJail) do
+    keptItemsLookup[itemName] = true
+end
+
+-- Separate item filtering logic
+local function FilterPlayerItems(inventory)
+    local itemsToRemove = {}
+    local itemsToKeep = {}
+    
+    for slot, item in pairs(inventory) do
+        if item and item.name and item.count and item.count > 0 then
+            if keptItemsLookup[item.name] then
+                -- Item should be kept - add to kept items
+                itemsToKeep[slot] = item
+            else
+                -- Item should be removed - add to removal list
+                table.insert(itemsToRemove, {slot = slot, item = item})
+            end
+        end
+    end
+    
+    return itemsToRemove, itemsToKeep
+end
+
 function SetJailTime(identifier, time, source)
     if time > 0 then
         local startTime = os.time()
-        local inventory = nil
+        local keptInventory = nil
         
         if source then
-            inventory = GetInventoryItems(source)
-            local itemsToRemove = {}
-            
-            for slot, item in pairs(inventory) do
-                if item and item.name and item.count and item.count > 0 then
-                    local shouldKeep = false
-                    
-                    for _, keepItem in pairs(Config.KeepItemsOnJail) do
-                        if item.name == keepItem then
-                            shouldKeep = true
-                            break
-                        end
-                    end
-                    
-                    if not shouldKeep then
-                        table.insert(itemsToRemove, {slot = slot, item = item})
-                    else
-                        inventory[slot] = nil
-                    end
-                end
-            end
+            local inventory = GetInventoryItems(source)
+            local itemsToRemove, itemsToKeep = FilterPlayerItems(inventory)
             
             for _, itemData in pairs(itemsToRemove) do
                 RemoveItem(source, itemData.item.name, itemData.item.count, itemData.item.metadata or itemData.item.info, itemData.slot)
             end
+            
+            keptInventory = itemsToKeep
         end
         
         MySQL.query.await('INSERT INTO ejj_prison (identifier, time, date, inventory) VALUES (?, ?, NOW(), ?) ON DUPLICATE KEY UPDATE time = ?, date = NOW(), inventory = ?', {
-            identifier, time, json.encode(inventory), time, json.encode(inventory)
+            identifier, time, json.encode(keptInventory), time, json.encode(keptInventory)
         })
         jailedPlayers[identifier] = time
         jailStartTimes[identifier] = startTime
@@ -372,7 +381,7 @@ end)
 
 lib.addCommand('resettunnel', {
     help = locale('help_reset_tunnel'),
-    restricted = 'group.admin'
+    restricted = Config.Permissions.admin
 }, function(source, args)
     if tunnelExists then
         ResetEscapeTunnel()
