@@ -81,6 +81,15 @@ Config.Locations = {
         pushups = vector4(1742.8623, 2480.6362, 45.7593, 120.2251),
         weights = vector4(1745.6586, 2483.7991, 45.7407, 208.9112),
         situps = vector4(1744.1934, 2479.4695, 45.7593, 123.2899)
+    },
+    blip = { -- Prison blip configuration for the map
+        enabled = true, -- Set to false to disable the prison blip
+        coords = vector3(1845.0, 2585.0, 45.0), -- Where the blip appears on map (near release point)
+        sprite = 238, -- Prison/jail icon (238 = prison icon, 60 = police station, 84 = marker)
+        color = 1, -- Red color (1 = red, 2 = green, 3 = blue, 5 = yellow, 8 = orange)
+        scale = 1.0, -- Size of the blip (0.5 = small, 1.0 = normal, 1.5 = large)
+        name = 'Bolingbroke Penitentiary', -- Label that appears when hovering over blip
+        shortRange = false -- Set to true if blip should only show when nearby, false to always show
     }
 }
 
