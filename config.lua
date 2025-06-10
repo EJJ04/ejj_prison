@@ -6,7 +6,7 @@ Config.Debug = false
 -- Which notification system should we use? Most people use ox_lib these days but you can pick 'qb' or 'esx' too
 Config.Notify = 'ox_lib'
 
--- Same thing for text UI - the little helper text that pops up when you're near stuff
+-- Which text UI system should we use for interaction prompts? Options: 'ox_lib' (modern, recommended), 'qb' (QBCore DrawText), 'esx' (ESX TextUI)
 Config.TextUI = 'ox_lib'
 
 -- Where should the text UI show up on screen? I like left-center but you can change it
@@ -18,6 +18,9 @@ Config.TextUIPosition = 'left-center'
 -- Which menu system to use for interactions like the shop and crafting
 -- Options: 'ox_lib' (modern, recommended), 'esx' (ESX context menus), 'qb' (QB menu system)
 Config.Menu = 'ox_lib'
+
+-- Which minigame system to use for skill checks? Options: 'ox_lib' (ox_lib skillCheck), 'qb' (qb-minigames)
+Config.Minigame = 'ox_lib'
 
 -- How should we display jail time? Options: 'minutes' (recommended), 'hours', 'seconds'
 Config.TimeFormat = 'minutes'
@@ -34,6 +37,14 @@ Config.KeepItemsOnJail = {
     -- 'wallet',
     -- 'keys',
     -- 'cigarettes',
+}
+
+Config.Permissions = {
+    -- Groups that can use admin commands (like resetting tunnel)
+    admin = {
+        'group.admin',    -- ESX admin group
+        'group.god'       -- QBCore god group
+    }
 }
 
 -- How many skill checks do players need to complete for jobs? 3 seems fair - not too easy, not too hard
@@ -241,6 +252,12 @@ Config.Shop = {
         model = 's_m_m_prisguard_01', -- Another prison guard
         coords = vector4(1783.2460, 2560.7188, 44.6731, 179.2982), -- Where he stands
         radius = 2.5 -- How close players need to be to shop
+    },
+    blip = { -- Blip configuration for the shop (only visible to jailed players)
+        sprite = 52, -- Shop/store icon
+        color = 2, -- Green color
+        scale = 0.8, -- Medium size
+        name = 'Prison Canteen' -- What appears on map
     },
     items = { -- What's available in the shop
         {
