@@ -10,6 +10,7 @@ local function InitializeFramework()
         RegisterNetEvent('esx:playerLoaded', function(xPlayer)
             PlayerData = xPlayer
             PlayerLoaded = true
+            TriggerServerEvent('ejj_prison:checkOfflineTime')
         end)
 
         RegisterNetEvent('esx:onPlayerLogout', function()
@@ -21,6 +22,7 @@ local function InitializeFramework()
             if GetCurrentResourceName() ~= resourceName then return end
             PlayerData = GetPlayerData()
             PlayerLoaded = true
+            TriggerServerEvent('ejj_prison:checkOfflineTime')
         end)
 
     elseif GetResourceState('qbx_core') == 'started' then
@@ -29,6 +31,7 @@ local function InitializeFramework()
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
+            TriggerServerEvent('ejj_prison:checkOfflineTime')
         end)
 
         RegisterNetEvent('qbx_core:client:playerLoggedOut', function()
@@ -40,6 +43,7 @@ local function InitializeFramework()
             if GetCurrentResourceName() ~= resourceName then return end
             PlayerData = GetPlayerData()
             PlayerLoaded = true
+            TriggerServerEvent('ejj_prison:checkOfflineTime')
         end)
     elseif GetResourceState('qb-core') == 'started' then
         QBCore = exports['qb-core']:GetCoreObject()
@@ -48,6 +52,7 @@ local function InitializeFramework()
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
+            TriggerServerEvent('ejj_prison:checkOfflineTime')
         end)
 
         RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -59,6 +64,7 @@ local function InitializeFramework()
             if GetCurrentResourceName() ~= resourceName then return end
             PlayerData = GetPlayerData()
             PlayerLoaded = true
+            TriggerServerEvent('ejj_prison:checkOfflineTime')
         end)
     else
         -- Add custom framework here
