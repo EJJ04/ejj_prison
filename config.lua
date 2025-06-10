@@ -22,6 +22,20 @@ Config.Menu = 'ox_lib'
 -- How should we display jail time? Options: 'minutes' (recommended), 'hours', 'seconds'
 Config.TimeFormat = 'minutes'
 
+-- Should players be able to serve prison time while offline? Set to true to enable offline time serving
+Config.OfflineTimeServing = true
+
+-- Items that players should keep when jailed (will not be removed from inventory)
+-- Add item names that should remain with the player during imprisonment
+Config.KeepItemsOnJail = {
+    'phone', -- Mobile phone
+    -- Add more items here that prisoners should keep
+    -- Examples:
+    -- 'wallet',
+    -- 'keys',
+    -- 'cigarettes',
+}
+
 -- How many skill checks do players need to complete for jobs? 3 seems fair - not too easy, not too hard
 Config.MinigameTries = 3
 
