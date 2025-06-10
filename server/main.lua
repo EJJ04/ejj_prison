@@ -69,10 +69,29 @@ function SetJailTime(identifier, time, source)
         
         if source then
             inventory = GetInventoryItems(source)
+            local itemsToRemove = {}
+            
             for slot, item in pairs(inventory) do
                 if item and item.name and item.count and item.count > 0 then
-                    RemoveItem(source, item.name, item.count, item.metadata or item.info, slot)
+                    local shouldKeep = false
+                    
+                    for _, keepItem in pairs(Config.KeepItemsOnJail) do
+                        if item.name == keepItem then
+                            shouldKeep = true
+                            break
+                        end
+                    end
+                    
+                    if not shouldKeep then
+                        table.insert(itemsToRemove, {slot = slot, item = item})
+                    else
+                        inventory[slot] = nil
+                    end
                 end
+            end
+            
+            for _, itemData in pairs(itemsToRemove) do
+                RemoveItem(source, itemData.item.name, itemData.item.count, itemData.item.metadata or itemData.item.info, itemData.slot)
             end
         end
         
@@ -512,6 +531,12 @@ exports('JailPlayer', function(playerId, jailTime)
     TriggerClientEvent('ejj_prison:changeToPrisonClothes', playerId)
     TriggerClientEvent('ejj_prison:notify', playerId, locale('server_jailed_for', jailTime), 'error')
     
+    if Config.KeepItemsOnJail and #Config.KeepItemsOnJail > 0 then
+        SetTimeout(2000, function() 
+            TriggerClientEvent('ejj_prison:notify', playerId, locale('server_items_kept_on_jail'), 'info')
+        end)
+    end
+    
     return true
 end)
 
@@ -716,4 +741,46 @@ RegisterNetEvent('ejj_prison:unjailPlayerExport', function(playerId)
     end
     
     exports['ejj_prison']:UnjailPlayer(playerId)
+end)
+
+RegisterNetEvent('ejj_prison:checkOfflineTime', function()
+    if not Config.OfflineTimeServing then
+        return
+    end
+    
+    local source = source
+    local xPlayer = GetPlayer(source)
+    
+    if not xPlayer then return end
+    
+    local identifier = GetIdentifier(source)
+    
+    local result = MySQL.query.await('SELECT time, UNIX_TIMESTAMP(date) as start_time FROM ejj_prison WHERE identifier = ?', {
+        identifier
+    })
+    
+    if result and result[1] and result[1].time > 0 then
+        local originalTime = result[1].time
+        local startTime = result[1].start_time
+        local currentTime = os.time()
+        
+        local offlineTimeElapsed = math.floor((currentTime - startTime) / 60)
+        local remainingTime = math.max(0, originalTime - offlineTimeElapsed)
+        
+        if remainingTime <= 0 then
+            SetJailTime(identifier, 0, source)
+            TriggerClientEvent('ejj_prison:notify', source, locale('server_served_offline_time'), 'success')
+        else
+            MySQL.query.await('UPDATE ejj_prison SET time = ?, date = NOW() WHERE identifier = ?', {
+                remainingTime, identifier
+            })
+            
+            jailedPlayers[identifier] = remainingTime
+            jailStartTimes[identifier] = currentTime
+            
+            if offlineTimeElapsed > 0 then
+                TriggerClientEvent('ejj_prison:notify', source, locale('server_offline_time_served', offlineTimeElapsed, remainingTime), 'info')
+            end
+        end
+    end
 end)
