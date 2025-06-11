@@ -62,7 +62,7 @@
   "ui_dig_tunnel": "[E] Grav Flukttunnel",
   "ui_escape_tunnel": "[E] Røm Gjennom Tunnel",
   "ui_start_cooking": "[E] Start Matlaging",
-  "ui_fix_electrical": "[E] Reparer Elektrisk Boks",
+  "ui_fix_electrical": "[E] Fix Electrical Box",
   "ui_chinups": "[E] Start Chinups",
   "ui_pushups": "[E] Start Push-ups", 
   "ui_weights": "[E] Løft Vekter",
@@ -159,5 +159,10 @@
   "server_served_offline_time": "Du sonet din fulle fengselsstraff offline og har blitt løslatt!",
   "server_offline_time_served": "Du sonet %s minutter offline. Gjenværende tid: %s minutter",
   
-  "server_items_kept_on_jail": "Du har fått lov til å beholde visse personlige gjenstander under fengslingen"
+  "server_items_kept_on_jail": "Du har fått lov til å beholde visse personlige gjenstander under fengslingen",
+  "server_released_automatic": "You have been automatically released from jail after serving your sentence",
+  "ui_pickup_resource": "[E] Pick up Resource",
+  "player_unjailed": "Player %s has been unjailed",
+  "you_were_unjailed": "You have been unjailed by %s",
+  "server_invalid_prison": "Ugyldig fengsel%s"
 } 

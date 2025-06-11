@@ -159,5 +159,11 @@
   "server_served_offline_time": "¡Cumpliste tu sentencia completa de prisión offline y has sido liberado!",
   "server_offline_time_served": "Cumpliste %s minutos offline. Tiempo restante: %s minutos",
   
-  "server_items_kept_on_jail": "Se te ha permitido conservar ciertos objetos personales durante tu encarcelamiento"
+  "server_items_kept_on_jail": "Se te ha permitido conservar ciertos objetos personales durante tu encarcelamiento",
+  "server_released_automatic": "You have been automatically released from jail after serving your sentence",
+  "ui_pickup_resource": "[E] Pick up Resource",
+  "player_unjailed": "Player %s has been unjailed",
+  "you_were_unjailed": "You have been unjailed by %s",
+  "ui_fix_electrical_box": "[E] Fix Electrical Box",
+  "server_invalid_prison": "Prisión inválida%s"
 } 
