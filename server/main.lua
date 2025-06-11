@@ -319,84 +319,76 @@ end
 
 lib.addCommand('jail', {
     help = locale('jail_command_help'),
+    restricted = 'group.police',
     params = {
-        { name = 'id', type = 'playerId', help = locale('jail_param_id') },
-        { name = 'time', type = 'number', help = locale('jail_param_time') },
-        { name = 'prison', type = 'string', help = 'Prison ID (e.g., bolingbroke)' }
+        {
+            name = 'id',
+            type = 'number',
+            help = locale('jail_command_id'),
+            optional = false
+        },
+        {
+            name = 'time',
+            type = 'number',
+            help = locale('jail_command_time'),
+            optional = false
+        },
+        {
+            name = 'reason',
+            type = 'string',
+            help = locale('jail_command_reason'),
+            optional = true
+        }
     }
-}, function(source, args)
-    if Config.RequirePoliceForJail and not IsPlayerPolice(source) then
-        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission'), 'error')
-        return
-    end
-    
+}, function(source, args, raw)
     local targetId = args.id
-    local jailTime = args.time
-    local prisonId = args.prison
-    local xPlayer = GetPlayer(targetId)
-    local xAdmin = GetPlayer(source)
+    local duration = args.time
+    local reason = args.reason or "No reason provided"
     
-    if not xPlayer then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+    local targetPlayer = GetPlayer(targetId)
+    if not targetPlayer then
+        Notify(source, locale('player_not_found'), 'error')
         return
     end
     
-    if not xAdmin then return end
+    local targetName = GetPlayerName(targetId)
+    local officerName = source == 0 and "Console" or GetPlayerName(source)
     
-    if not IsValidPrison(prisonId) then
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_invalid_prison', prisonId), 'error')
-        return
-    end
+    LogJail(officerName, targetName, duration, reason)
     
-    SetJailTime(GetIdentifier(targetId), jailTime, targetId, prisonId)
-    
-    local prisonConfig = GetPrisonConfig(prisonId)
-    
-    SetEntityCoords(GetPlayerPed(targetId), prisonConfig.locations.jail.x, prisonConfig.locations.jail.y, prisonConfig.locations.jail.z)
-    SetEntityHeading(GetPlayerPed(targetId), prisonConfig.locations.jail.w or 0.0)
-    
-    TriggerClientEvent('ejj_prison:jailStatusChanged', targetId, true, prisonId)
-    TriggerClientEvent('ejj_prison:changeToPrisonClothes', targetId)
-    
-    TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetId, jailTime), 'success')
-    TriggerClientEvent('ejj_prison:notify', targetId, locale('you_were_jailed', jailTime, source), 'error')
+    TriggerClientEvent('ejj_prison:client:jailPlayer', targetId, duration)
+    SetJailTime(targetId, duration)
+    Notify(source, locale('player_jailed', targetName, duration), 'success')
 end)
 
 lib.addCommand('unjail', {
-    help = locale('help_unjail'),
+    help = locale('unjail_command_help'),
+    restricted = 'group.police',
     params = {
-        { name = 'id', type = 'playerId', help = locale('param_player_id') }
+        {
+            name = 'id',
+            type = 'number',
+            help = locale('unjail_command_id'),
+            optional = false
+        }
     }
-}, function(source, args)
-    if Config.RequirePoliceForJail and not IsPlayerPolice(source) then
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_no_permission_command'), 'error')
-        return
-    end
-    
+}, function(source, args, raw)
     local targetId = args.id
-    local xPlayer = GetPlayer(targetId)
-    local xAdmin = GetPlayer(source)
     
-    if not xPlayer then
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_player_not_found'), 'error')
+    local targetPlayer = GetPlayer(targetId)
+    if not targetPlayer then
+        Notify(source, locale('player_not_found'), 'error')
         return
     end
     
-    if not xAdmin then return end
+    local targetName = GetPlayerName(targetId)
+    local officerName = source == 0 and "Console" or GetPlayerName(source)
     
-    local prisonId = GetPlayerPrison(targetId)
-    local prisonConfig = GetPrisonConfig(prisonId)
+    LogUnjail(officerName, targetName, true)
     
-    SetJailTime(GetIdentifier(targetId), 0, targetId)
-    
-    SetEntityCoords(GetPlayerPed(targetId), prisonConfig.locations.release.x, prisonConfig.locations.release.y, prisonConfig.locations.release.z)
-    SetEntityHeading(GetPlayerPed(targetId), prisonConfig.locations.release.w or 0.0)
-    
-    TriggerClientEvent('ejj_prison:jailStatusChanged', targetId, false)
-    TriggerClientEvent('ejj_prison:restoreOriginalClothes', targetId)
-    
-    TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', targetId), 'success')
-    TriggerClientEvent('ejj_prison:notify', targetId, locale('you_were_unjailed', source), 'success')
+    TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
+    SetJailTime(targetId, 0)
+    Notify(source, locale('player_unjailed', targetName), 'success')
 end)
 
 lib.addCommand('jailstatus', {
@@ -517,3 +509,59 @@ MySQL.execute([[
         PRIMARY KEY (`identifier`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ]])
+
+RegisterNetEvent('ejj_prison:server:tunnelActivity', function(action)
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogTunnelActivity(playerName, action)
+end)
+
+RegisterNetEvent('ejj_prison:playerEscaped', function()
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogEscapeAttempt(playerName, true, "Tunnel")
+end)
+
+RegisterNetEvent('ejj_prison:server:jobCompleted', function(jobType, timeReduced)
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogJobCompletion(playerName, jobType, timeReduced)
+end)
+
+RegisterNetEvent('ejj_prison:server:craftingActivity', function(item, success)
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogCrafting(playerName, item, success)
+end)
+
+RegisterNetEvent('ejj_prison:jailPlayerExport', function(playerId, jailTime)
+    local src = source
+    local targetName = GetPlayerName(playerId)
+    local officerName = GetPlayerName(src)
+    LogJail(officerName, targetName, jailTime, "Exported")
+end)
+
+RegisterNetEvent('ejj_prison:unjailPlayerExport', function(playerId)
+    local src = source
+    local targetName = GetPlayerName(playerId)
+    local officerName = GetPlayerName(src)
+    LogUnjail(officerName, targetName, true)
+end)
+
+RegisterNetEvent('ejj_prison:server:resourcePickup', function(item)
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogCrafting(playerName, item, true, "Resource Pickup")
+end)
+
+RegisterNetEvent('ejj_prison:server:shopPurchase', function(item)
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogCrafting(playerName, item, true, "Shop Purchase")
+end)
+
+RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
+    local src = source
+    local playerName = GetPlayerName(src)
+    LogCrafting(playerName, recipeId, true, "Crafting")
+end)
