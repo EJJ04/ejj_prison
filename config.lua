@@ -17,7 +17,7 @@ Config.TextUIPosition = 'left-center'
 
 -- Which menu system to use for interactions like the shop and crafting
 -- Options: 'ox_lib' (modern, recommended), 'esx' (ESX context menus), 'qb' (QB menu system)
-Config.Menu = 'ox_lib'
+Config.Menu = 'qb'
 
 -- Which minigame system to use for skill checks? Options: 'ox_lib' (ox_lib skillCheck), 'qb' (qb-minigames)
 Config.Minigame = 'ox_lib'
@@ -40,10 +40,30 @@ Config.KeepItemsOnJail = {
 }
 
 Config.Permissions = {
-    -- Groups that can use admin commands (like resetting tunnel)
-    admin = {
-        'group.admin',    -- ESX admin group
-        'group.god'       -- QBCore god group
+    jail = {
+        requirePolice = true,
+        allowedJobs = {'police', 'sheriff'}, -- Add any jobs that should have permission
+        allowedGroups = {'police', 'admin'} -- Add any groups that should have permission
+    },
+    unjail = {
+        requirePolice = true,
+        allowedJobs = {'police', 'sheriff'},
+        allowedGroups = {'police', 'admin'}
+    },
+    check = {
+        requirePolice = true,
+        allowedJobs = {'police', 'sheriff'},
+        allowedGroups = {'police', 'admin'}
+    },
+    add = {
+        requirePolice = true,
+        allowedJobs = {'police', 'sheriff'},
+        allowedGroups = {'police', 'admin'}
+    },
+    remove = {
+        requirePolice = true,
+        allowedJobs = {'police', 'sheriff'},
+        allowedGroups = {'police', 'admin'}
     }
 }
 
@@ -192,55 +212,55 @@ Config.Prisons = {
             }
         },
         escape = { -- Prison escape system - the fun part! Players can dig tunnels to break out
-            resetTime = 30, -- How long until tunnel disappears (minutes) - prevents permanent escapes
-            digging = { -- Where players can start digging the tunnel
-                coords = vector4(1774.6844, 2480.8213, 45.7408, 209.5112), -- Digging location
-                radius = 1.5, -- How close they need to be
-                requiredItem = 'shovel', -- What item they need to dig (crafted from materials)
-                removeShovel = true, -- Should we take their shovel after digging? Set false to keep it
-                animation = { -- The digging animation - looks pretty cool
-                    dict = 'random@burial',
-                    anim = 'a_burial',
-                    duration = 10000, -- 10 seconds of digging
-                    props = { -- Props that appear while digging
-                        {
-                            bone = 28422, -- Hand bone
-                            model = 'prop_tool_shovel', -- Shovel prop
-                            placement = {
-                                pos = vector3(0.0, 0.0, 0.24),
-                                rot = vector3(0.0, 0.0, 0.0)
-                            }
-                        },
-                        {
-                            bone = 28422,
-                            model = 'prop_ld_shovel_dirt', -- Dirt on shovel prop
-                            placement = {
-                                pos = vector3(0.0, 0.0, 0.24),
-                                rot = vector3(0.0, 0.0, 0.0)
-                            }
-                        }
+    resetTime = 30, -- How long until tunnel disappears (minutes) - prevents permanent escapes
+    digging = { -- Where players can start digging the tunnel
+        coords = vector4(1774.6844, 2480.8213, 45.7408, 209.5112), -- Digging location
+        radius = 1.5, -- How close they need to be
+        requiredItem = 'shovel', -- What item they need to dig (crafted from materials)
+        removeShovel = true, -- Should we take their shovel after digging? Set false to keep it
+        animation = { -- The digging animation - looks pretty cool
+            dict = 'random@burial',
+            anim = 'a_burial',
+            duration = 10000, -- 10 seconds of digging
+            props = { -- Props that appear while digging
+                {
+                    bone = 28422, -- Hand bone
+                    model = 'prop_tool_shovel', -- Shovel prop
+                    placement = {
+                        pos = vector3(0.0, 0.0, 0.24),
+                        rot = vector3(0.0, 0.0, 0.0)
                     }
                 },
-                tunnelRock = { -- The rock that appears at tunnel entrance
-                    coords = vector3(1775.223, 2479.969, 44.557),
-                    model = 'prop_rock_1_i'
+                {
+                    bone = 28422,
+                    model = 'prop_ld_shovel_dirt', -- Dirt on shovel prop
+                    placement = {
+                        pos = vector3(0.0, 0.0, 0.24),
+                        rot = vector3(0.0, 0.0, 0.0)
+                    }
                 }
-            },
-            exit = { -- Where the tunnel exits (outside prison walls)
-                coords = vector4(1803.2581, 2436.7910, 45.7550, 214.3743), -- Exit location
-                radius = 1.5, -- How close to get to exit
-                exitRock = { -- Rock that appears at exit
-                    coords = vector3(1803.306, 2436.779, 44.531),
-                    model = 'prop_rock_1_i'
-                }
-            },
-            alarm = { -- Prison alarms when someone escapes
-                enabled = true, -- Set false to disable alarms
-                name = 'PRISON_ALARMS', -- Sound name
-                duration = 60000, -- How long alarms last (60 seconds)
-                maxDistance = 500.0, -- How far away you can hear them
-                center = vector3(1774.6844, 2480.8213, 45.7408) -- Where sound comes from
             }
+        },
+        tunnelRock = { -- The rock that appears at tunnel entrance
+            coords = vector3(1775.223, 2479.969, 44.557),
+            model = 'prop_rock_1_i'
+        }
+    },
+    exit = { -- Where the tunnel exits (outside prison walls)
+        coords = vector4(1803.2581, 2436.7910, 45.7550, 214.3743), -- Exit location
+        radius = 1.5, -- How close to get to exit
+        exitRock = { -- Rock that appears at exit
+            coords = vector3(1803.306, 2436.779, 44.531),
+            model = 'prop_rock_1_i'
+        }
+    },
+    alarm = { -- Prison alarms when someone escapes
+        enabled = true, -- Set false to disable alarms
+        name = 'PRISON_ALARMS', -- Sound name
+        duration = 60000, -- How long alarms last (60 seconds)
+        maxDistance = 500.0, -- How far away you can hear them
+        center = vector3(1774.6844, 2480.8213, 45.7408) -- Where sound comes from
+    }
         },
         zone = { -- Prison boundary zone - this prevents players from escaping by just walking out
             enabled = true, -- Set to false if you don't want zone restrictions
@@ -363,8 +383,6 @@ Config.Dispatch = {
         radius = 0, -- No radius circle
     }
 }
-
-Config.RequirePoliceForJail = true -- Set to false to allow anyone (or AI) to use jail/unjail commands
 
 Config.ResourcePickupAnimation = {
     dict = 'amb@prop_human_bum_bin@base',
