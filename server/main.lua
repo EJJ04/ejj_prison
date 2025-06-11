@@ -32,32 +32,33 @@ local function IsValidPrison(prisonId)
 end
 
 function CheckJailTime(source, suppressUnjail)
-    local Player = GetPlayer(source)
-    if not Player then return 0 end
     local identifier = GetIdentifier(source)
-    local jailData = jailedPlayers[identifier]
-    if jailData and type(jailData) == 'table' then
-        local remainingTime = jailData.time - math.floor((os.time() - jailData.startTime) / 60)
-        if remainingTime <= 0 then
-            if suppressUnjail then
+    if not identifier then return 0 end
+    
+    local result = MySQL.query.await('SELECT time, prison FROM ejj_prison WHERE identifier = ?', {identifier})
+    if result and result[1] then
+        local jailTime = result[1].time
+        local prisonId = result[1].prison
+        
+        if jailTime > 0 then
+            local prisonConfig = Config.Prisons[prisonId]
+            if not prisonConfig then
                 return 0
             end
-            local prisonId = jailData.prisonId or 'bolingbroke'
-            local prisonConfig = Config.Prisons[prisonId]
-            jailedPlayers[identifier] = nil
-            MySQL.query('DELETE FROM ejj_prison WHERE identifier = ?', {identifier})
-            if prisonConfig and prisonConfig.locations and prisonConfig.locations.release then
-                local releaseCoords = prisonConfig.locations.release
-                SetEntityCoords(GetPlayerPed(source), releaseCoords.x, releaseCoords.y, releaseCoords.z)
-                SetEntityHeading(GetPlayerPed(source), releaseCoords.w or 0.0)
+            
+            if jailTime == 0 and not suppressUnjail then
+                MySQL.update('UPDATE ejj_prison SET time = 0, prison = NULL WHERE identifier = ?', {identifier})
+                TriggerClientEvent('ejj_prison:client:setJailStatus', source, false)
+                TriggerClientEvent('ejj_prison:client:setJailTime', source, 0)
+                TriggerClientEvent('ejj_prison:client:setPrisonId', source, nil)
+                TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
+                TriggerClientEvent('ejj_prison:client:cleanupPrison', source)
+            else
+                TriggerClientEvent('ejj_prison:client:setJailTime', source, jailTime)
             end
-            TriggerClientEvent('ejj_prison:notify', source, locale('server_released_automatic'), 'success')
-            TriggerClientEvent('ejj_prison:jailStatusChanged', source, false, nil)
-            TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
-            SetJailTime(identifier, 0, source)
-            return 0
+            
+            return jailTime
         end
-        return remainingTime
     end
     return 0
 end
@@ -99,10 +100,37 @@ function SetJailTime(identifier, time, source, prisonId)
         if source then
             removedInventory = InventoryHandler(source)
         end
+
         MySQL.query.await('INSERT INTO ejj_prison (identifier, time, date, inventory, prison) VALUES (?, ?, NOW(), ?, ?) ON DUPLICATE KEY UPDATE time = ?, date = NOW(), inventory = ?, prison = ?', {
             identifier, time, json.encode(removedInventory), prisonId, time, json.encode(removedInventory), prisonId
         })
         jailedPlayers[identifier] = { time = time, startTime = startTime, prisonId = prisonId }
+
+        if source then
+            local prisonConfig = Config.Prisons[prisonId]
+            if prisonConfig and prisonConfig.locations and prisonConfig.locations.jail then
+                local targetPed = GetPlayerPed(source)
+                if targetPed then
+                    SetEntityCoords(targetPed, prisonConfig.locations.jail.x, prisonConfig.locations.jail.y, prisonConfig.locations.jail.z)
+                    SetEntityHeading(targetPed, prisonConfig.locations.jail.w or 0.0)
+                    TriggerClientEvent('ejj_prison:client:setJailStatus', source, true)
+                    TriggerClientEvent('ejj_prison:client:setJailTime', source, time)
+                    TriggerClientEvent('ejj_prison:client:setPrisonId', source, prisonId)
+                    TriggerClientEvent('ejj_prison:changeToPrisonClothes', source)
+                    TriggerClientEvent('ejj_prison:client:resetJobCooldowns', source)
+                end
+            end
+        end
+
+        SetTimeout(time * 60 * 1000, function()
+            local currentTime = CheckJailTime(source, true)
+            if currentTime and currentTime > 0 then
+                SetJailTime(identifier, 0, source, prisonId)
+                if source then
+                    TriggerClientEvent('ejj_prison:notify', source, locale('server_released_automatic'), 'success')
+                end
+            end
+        end)
     else
         local result = MySQL.query.await('SELECT inventory FROM ejj_prison WHERE identifier = ?', {
             identifier
@@ -117,6 +145,26 @@ function SetJailTime(identifier, time, source, prisonId)
                 end
             end
         end
+
+        if source and prisonId then
+            local prisonConfig = Config.Prisons[prisonId]
+            if prisonConfig and prisonConfig.locations and prisonConfig.locations.release then
+                local targetPed = GetPlayerPed(source)
+                if targetPed then
+                    SetEntityCoords(targetPed, prisonConfig.locations.release.x, prisonConfig.locations.release.y, prisonConfig.locations.release.z)
+                    SetEntityHeading(targetPed, prisonConfig.locations.release.w or 0.0)
+                end
+            end
+        end
+
+        if source then
+            TriggerClientEvent('ejj_prison:client:cleanupPrison', source)
+            TriggerClientEvent('ejj_prison:client:setJailStatus', source, false)
+            TriggerClientEvent('ejj_prison:client:setJailTime', source, 0)
+            TriggerClientEvent('ejj_prison:client:setPrisonId', source, nil)
+            TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
+        end
+
         MySQL.query.await('DELETE FROM ejj_prison WHERE identifier = ?', {
             identifier
         })
@@ -133,24 +181,24 @@ function GetCurrentJailTime(identifier)
     return math.max(0, remainingTime)
 end
 
-function RestorePlayerJail(source)
-    local xPlayer = GetPlayer(source)
-    if not xPlayer then return end
+function RestorePlayerJail(playerId, prisonId)
+    local identifier = GetIdentifier(playerId)
+    if not identifier then return end
     
-    local identifier = GetIdentifier(source)
-    local jailTime = CheckJailTime(source)
-    
+    local jailTime = CheckJailTime(playerId)
     if jailTime and jailTime > 0 then
-        local prisonId = GetPlayerPrison(source)
-        local prisonConfig = GetPrisonConfig(prisonId)
-        
-        SetEntityCoords(GetPlayerPed(source), prisonConfig.locations.jail.x, prisonConfig.locations.jail.y, prisonConfig.locations.jail.z)
-        SetEntityHeading(GetPlayerPed(source), prisonConfig.locations.jail.w or 0.0)
-        
-        TriggerClientEvent('ejj_prison:jailStatusChanged', source, true, prisonId)
-        TriggerClientEvent('ejj_prison:changeToPrisonClothes', source)
-        
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_returned_to_prison', jailTime), 'info')
+        local prisonConfig = Config.Prisons[prisonId]
+        if prisonConfig and prisonConfig.locations and prisonConfig.locations.jail then
+            local targetPed = GetPlayerPed(playerId)
+            if targetPed then
+                SetEntityCoords(targetPed, prisonConfig.locations.jail.x, prisonConfig.locations.jail.y, prisonConfig.locations.jail.z)
+                SetEntityHeading(targetPed, prisonConfig.locations.jail.w or 0.0)
+            end
+        end
+        TriggerClientEvent('ejj_prison:client:setJailStatus', playerId, true)
+        TriggerClientEvent('ejj_prison:client:setJailTime', playerId, jailTime)
+        TriggerClientEvent('ejj_prison:client:setPrisonId', playerId, prisonId)
+        TriggerClientEvent('ejj_prison:client:setJailClothes', playerId)
     end
 end
 
@@ -185,11 +233,15 @@ AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() == resourceName then
         StartPrisonTimer()
         
-        for _, playerId in ipairs(GetPlayers()) do
-            local source = tonumber(playerId)
-            if source then
-                Wait(1000) 
-                RestorePlayerJail(source)
+        local players = GetPlayers()
+        for _, playerId in ipairs(players) do
+            local identifier = GetIdentifier(playerId)
+            if identifier then
+                local jailTime = CheckJailTime(playerId)
+                if jailTime and jailTime > 0 then
+                    local prisonId = GetPlayerPrison(playerId)
+                    RestorePlayerJail(playerId, prisonId)
+                end
             end
         end
 
@@ -209,8 +261,14 @@ AddEventHandler('onResourceStop', function(resourceName)
 end)
 
 AddEventHandler('playerJoining', function()
-    if not prisonTimer then
-        StartPrisonTimer()
+    local source = source
+    local identifier = GetIdentifier(source)
+    if identifier then
+        local jailTime = CheckJailTime(source)
+        if jailTime and jailTime > 0 then
+            local prisonId = GetPlayerPrison(source)
+            RestorePlayerJail(source, prisonId)
+        end
     end
 end)
 
@@ -222,10 +280,27 @@ AddEventHandler('ejj_prison:playerLoaded', function(source)
 end)
 
 lib.callback.register('ejj_prison:getJailTime', function(source)
-    if Config.RequirePoliceForJail and not IsPlayerPolice(source) then
-        return false
+    local identifier = GetIdentifier(source)
+    if not identifier then return 0 end
+    
+    local result = MySQL.query.await('SELECT time, date FROM ejj_prison WHERE identifier = ?', {identifier})
+    if result and result[1] and result[1].time > 0 then
+        local jailTime = result[1].time
+        local startDate = result[1].date
+        local currentTime = os.time()
+        local startTime = os.time(os.date("!*t", startDate))
+        local elapsedMinutes = math.floor((currentTime - startTime) / 60)
+        local remainingTime = math.max(0, jailTime - elapsedMinutes)
+        
+        if remainingTime > 0 then
+            MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {remainingTime, identifier})
+        else
+            MySQL.update('DELETE FROM ejj_prison WHERE identifier = ?', {identifier})
+        end
+        
+        return remainingTime
     end
-    return CheckJailTime(source, true)
+    return 0
 end)
 
 lib.callback.register('ejj_prison:getPlayerInventory', function(source)
@@ -334,31 +409,40 @@ lib.addCommand('jail', {
             optional = false
         },
         {
-            name = 'reason',
+            name = 'prison',
             type = 'string',
-            help = locale('jail_command_reason'),
+            help = locale('jail_command_prison'),
             optional = true
         }
     }
 }, function(source, args, raw)
+    if not HasPermission(source, 'jail') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
+        return
+    end
+
     local targetId = args.id
     local duration = args.time
-    local reason = args.reason or "No reason provided"
+    local prisonId = args.prison or 'bolingbroke'
     
     local targetPlayer = GetPlayer(targetId)
     if not targetPlayer then
-        Notify(source, locale('player_not_found'), 'error')
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
         return
     end
     
     local targetName = GetPlayerName(targetId)
     local officerName = source == 0 and "Console" or GetPlayerName(source)
+    local targetIdentifier = GetIdentifier(targetId)
     
-    LogJail(officerName, targetName, duration, reason)
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return
+    end
     
-    TriggerClientEvent('ejj_prison:client:jailPlayer', targetId, duration)
-    SetJailTime(targetId, duration)
-    Notify(source, locale('player_jailed', targetName, duration), 'success')
+    LogJail(officerName, targetName, duration)
+    SetJailTime(targetIdentifier, duration, targetId, prisonId)
+    TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetName, duration), 'success')
 end)
 
 lib.addCommand('unjail', {
@@ -373,49 +457,77 @@ lib.addCommand('unjail', {
         }
     }
 }, function(source, args, raw)
+    if not HasPermission(source, 'unjail') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_unjail'), 'error')
+        return
+    end
+
     local targetId = args.id
     
     local targetPlayer = GetPlayer(targetId)
     if not targetPlayer then
-        Notify(source, locale('player_not_found'), 'error')
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
         return
     end
     
     local targetName = GetPlayerName(targetId)
     local officerName = source == 0 and "Console" or GetPlayerName(source)
+    local targetIdentifier = GetIdentifier(targetId)
+    
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return
+    end
+    
+    local result = MySQL.query.await('SELECT time, prison FROM ejj_prison WHERE identifier = ?', {targetIdentifier})
+    if not result or not result[1] or result[1].time <= 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', targetName), 'error')
+        return
+    end
+    
+    local prisonId = result[1].prison or 'bolingbroke'
     
     LogUnjail(officerName, targetName, true)
     
-    TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
-    SetJailTime(targetId, 0)
-    Notify(source, locale('player_unjailed', targetName), 'success')
+    SetJailTime(targetIdentifier, 0, targetId, prisonId)
+    TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', targetName), 'success')
 end)
 
 lib.addCommand('jailstatus', {
-    help = locale('help_jail_status'),
+    help = locale('jailstatus_command_help'),
+    restricted = 'group.police',
     params = {
-        { name = 'id', type = 'playerId', help = locale('param_player_id') }
+        {
+            name = 'id',
+            type = 'number',
+            help = locale('jail_command_id'),
+            optional = true
+        }
     }
-}, function(source, args)
-    if Config.RequirePoliceForJail and not IsPlayerPolice(source) then
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_no_permission_command'), 'error')
+}, function(source, args, raw)
+    if not HasPermission(source, 'check') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_check'), 'error')
         return
     end
     
-    local targetId = args.id
-    local xPlayer = GetPlayer(targetId)
-    
-    if not xPlayer then
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_player_not_found'), 'error')
+    local targetId = args.id or source
+    local targetPlayer = GetPlayer(targetId)
+    if not targetPlayer then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
         return
     end
     
-    local jailTime = CheckJailTime(targetId)
+    local identifier = GetIdentifier(targetId)
+    if not identifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return
+    end
     
-    if jailTime and jailTime > 0 then
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_player_jail_time', targetId, jailTime), 'info')
+    local result = MySQL.query.await('SELECT time, prison FROM ejj_prison WHERE identifier = ?', {identifier})
+    if result and result[1] and result[1].time > 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_jail_time', GetPlayerName(targetId), result[1].time), 'info')
     else
-        TriggerClientEvent('ejj_prison:notify', source, locale('server_player_not_in_jail', targetId), 'info')
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'info')
     end
 end)
 
@@ -435,12 +547,21 @@ RegisterNetEvent('ejj_prison:completeJob', function(jobType, location)
     local source = source
     local xPlayer = GetPlayer(source)
     if not xPlayer then return end
+    
     local identifier = GetIdentifier(source)
-    local jailData = jailedPlayers[identifier]
-    if not jailData or jailData.time <= 0 then
+    if not identifier then return end
+    
+    local result = MySQL.query.await('SELECT time, prison FROM ejj_prison WHERE identifier = ?', {identifier})
+    if not result or not result[1] or result[1].time <= 0 then
         TriggerClientEvent('ejj_prison:notify', source, locale('server_not_in_jail'), 'error')
         return
     end
+    
+    local jailData = {
+        time = result[1].time,
+        prisonId = result[1].prison
+    }
+    
     local rewardTime = 0
     if jobType == 'electrician' and type(location) == 'number' then
         rewardTime = Config.JobRewards.electrician[location] or 0
@@ -449,34 +570,35 @@ RegisterNetEvent('ejj_prison:completeJob', function(jobType, location)
     else
         rewardTime = Config.JobRewards[jobType] or 0
     end
-    local newOriginalTime = jailData.time - rewardTime
-    if newOriginalTime > 0 then
-        jailedPlayers[identifier].time = newOriginalTime
-        MySQL.query.await('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {newOriginalTime, identifier})
-        local currentTime = os.time()
-        local timeElapsed = math.floor((currentTime - jailData.startTime) / 60)
-        local remainingTime = math.max(0, newOriginalTime - timeElapsed)
-        if remainingTime <= 0 then
-            SetJailTime(identifier, 0, source)
-            local prisonId = jailData.prisonId or 'bolingbroke'
-            local prisonConfig = GetPrisonConfig(prisonId)
-            SetEntityCoords(GetPlayerPed(source), prisonConfig.locations.release.x, prisonConfig.locations.release.y, prisonConfig.locations.release.z)
-            SetEntityHeading(GetPlayerPed(source), prisonConfig.locations.release.w or 0.0)
-            TriggerClientEvent('ejj_prison:jailStatusChanged', source, false)
+    
+    if rewardTime > 0 then
+        local newTime = math.max(0, jailData.time - rewardTime)
+        
+        MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {newTime, identifier})
+        
+        TriggerClientEvent('ejj_prison:client:setJailTime', source, newTime)
+        
+        if newTime == 0 then
+            local prisonConfig = Config.Prisons[jailData.prisonId]
+            if prisonConfig and prisonConfig.locations and prisonConfig.locations.release then
+                SetEntityCoords(GetPlayerPed(source), 
+                    prisonConfig.locations.release.x, 
+                    prisonConfig.locations.release.y, 
+                    prisonConfig.locations.release.z)
+                SetEntityHeading(GetPlayerPed(source), prisonConfig.locations.release.w or 0.0)
+            end
+            
+            TriggerClientEvent('ejj_prison:client:setJailStatus', source, false)
+            TriggerClientEvent('ejj_prison:client:setPrisonId', source, nil)
             TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
+            TriggerClientEvent('ejj_prison:client:cleanupPrison', source)
             TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_released'), 'success')
         else
-            TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_time_reduced', rewardTime, remainingTime), 'success')
+            TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_time_reduced', rewardTime, newTime), 'success')
         end
-    else
-        SetJailTime(identifier, 0, source)
-        local prisonId = jailData.prisonId or 'bolingbroke'
-        local prisonConfig = GetPrisonConfig(prisonId)
-        SetEntityCoords(GetPlayerPed(source), prisonConfig.locations.release.x, prisonConfig.locations.release.y, prisonConfig.locations.release.z)
-        SetEntityHeading(GetPlayerPed(source), prisonConfig.locations.release.w or 0.0)
-        TriggerClientEvent('ejj_prison:jailStatusChanged', source, false)
-        TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
-        TriggerClientEvent('ejj_prison:notify', source, locale('job_completed_released'), 'success')
+        
+        local playerName = GetPlayerName(source)
+        LogJobCompletion(playerName, jobType, rewardTime)
     end
 end)
 
@@ -522,11 +644,42 @@ RegisterNetEvent('ejj_prison:playerEscaped', function()
     LogEscapeAttempt(playerName, true, "Tunnel")
 end)
 
-RegisterNetEvent('ejj_prison:server:jobCompleted', function(jobType, timeReduced)
-    local src = source
-    local playerName = GetPlayerName(src)
-    LogJobCompletion(playerName, jobType, timeReduced)
-end)
+function ReduceJailTime(identifier, timeToReduce, source, prisonId)
+    if not identifier then return end
+    
+    local currentTime = CheckJailTime(source)
+    if not currentTime or currentTime <= 0 then return end
+    
+    local newTime = math.max(0, currentTime - timeToReduce)
+    
+    MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {newTime, identifier})
+    
+    if jailedPlayers[identifier] then
+        jailedPlayers[identifier].time = newTime
+    end
+    
+    if source then
+        TriggerClientEvent('ejj_prison:client:setJailTime', source, newTime)
+        
+        if newTime == 0 then
+            TriggerClientEvent('ejj_prison:client:setJailStatus', source, false)
+            TriggerClientEvent('ejj_prison:client:setPrisonId', source, nil)
+            TriggerClientEvent('ejj_prison:restoreOriginalClothes', source)
+            TriggerClientEvent('ejj_prison:client:cleanupPrison', source)
+            
+            if prisonId then
+                local prisonConfig = Config.Prisons[prisonId]
+                if prisonConfig and prisonConfig.locations and prisonConfig.locations.release then
+                    SetEntityCoords(GetPlayerPed(source), 
+                        prisonConfig.locations.release.x, 
+                        prisonConfig.locations.release.y, 
+                        prisonConfig.locations.release.z)
+                    SetEntityHeading(GetPlayerPed(source), prisonConfig.locations.release.w or 0.0)
+                end
+            end
+        end
+    end
+end
 
 RegisterNetEvent('ejj_prison:server:craftingActivity', function(item, success)
     local src = source
@@ -564,4 +717,160 @@ RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
     local src = source
     local playerName = GetPlayerName(src)
     LogCrafting(playerName, recipeId, true, "Crafting")
+end)
+
+exports('JailPlayer', function(source, targetId, duration, reason, prisonId)
+    if not HasPermission(source, 'jail') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
+        return false
+    end
+    
+    local targetPlayer = GetPlayer(targetId)
+    if not targetPlayer then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    local targetName = GetPlayerName(targetId)
+    local officerName = source == 0 and "Console" or GetPlayerName(source)
+    local targetIdentifier = GetIdentifier(targetId)
+    
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    LogJail(officerName, targetName, duration)
+    SetJailTime(targetIdentifier, duration, nil, prisonId)
+    TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetName, duration), 'success')
+    return true
+end)
+
+exports('UnjailPlayer', function(source, targetId)
+    if not HasPermission(source, 'unjail') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_unjail'), 'error')
+        return false
+    end
+    
+    local targetPlayer = GetPlayer(targetId)
+    if not targetPlayer then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    local targetName = GetPlayerName(targetId)
+    local officerName = source == 0 and "Console" or GetPlayerName(source)
+    local targetIdentifier = GetIdentifier(targetId)
+    
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    LogUnjail(officerName, targetName, true)
+    
+    TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
+    SetJailTime(targetIdentifier, 0)
+    TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', targetName), 'success')
+    return true
+end)
+
+exports('CheckJailTime', function(source, targetId)
+    if not HasPermission(source, 'check') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_check'), 'error')
+        return false
+    end
+    
+    local targetIdentifier = GetIdentifier(targetId)
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    local jailTime = CheckJailTime(targetIdentifier)
+    if jailTime and jailTime > 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_jail_time', GetPlayerName(targetId), jailTime), 'info')
+        return jailTime
+    else
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'info')
+        return 0
+    end
+end)
+
+exports('AddJailTime', function(source, targetId, additionalTime)
+    if not HasPermission(source, 'add') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_add'), 'error')
+        return false
+    end
+    
+    local targetIdentifier = GetIdentifier(targetId)
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    local currentTime = CheckJailTime(targetIdentifier)
+    if not currentTime or currentTime <= 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'error')
+        return false
+    end
+    
+    local newTime = currentTime + additionalTime
+    SetJailTime(targetIdentifier, newTime)
+    TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_added', GetPlayerName(targetId), additionalTime, newTime), 'success')
+    return true
+end)
+
+exports('RemoveJailTime', function(source, targetId, removeTime)
+    if not HasPermission(source, 'remove') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_remove'), 'error')
+        return false
+    end
+    
+    local targetIdentifier = GetIdentifier(targetId)
+    if not targetIdentifier then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        return false
+    end
+    
+    local currentTime = CheckJailTime(targetIdentifier)
+    if not currentTime or currentTime <= 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'error')
+        return false
+    end
+    
+    local newTime = math.max(0, currentTime - removeTime)
+    SetJailTime(targetIdentifier, newTime)
+    
+    if newTime == 0 then
+        TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', GetPlayerName(targetId)), 'success')
+    else
+        TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_removed', GetPlayerName(targetId), removeTime, newTime), 'success')
+    end
+    return true
+end)
+
+lib.callback.register('ejj_prison:getPlayerPrison', function(source)
+    local identifier = GetIdentifier(source)
+    if not identifier then return nil end
+    
+    local result = MySQL.query.await('SELECT prison FROM ejj_prison WHERE identifier = ?', {identifier})
+    if result and result[1] then
+        return result[1].prison
+    end
+    return nil
+end)
+
+RegisterNetEvent('ejj_prison:server:releasePlayer', function()
+    local source = source
+    local identifier = GetIdentifier(source)
+    if not identifier then return end
+
+    local result = MySQL.query.await('SELECT prison FROM ejj_prison WHERE identifier = ?', {identifier})
+    if result and result[1] then
+        local prisonId = result[1].prison or 'bolingbroke'
+        SetJailTime(identifier, 0, source, prisonId)
+        TriggerClientEvent('ejj_prison:notify', source, locale('server_released_automatic'), 'success')
+    end
 end)

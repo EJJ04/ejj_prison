@@ -65,7 +65,7 @@ function GetIdentifier(source)
         -- Add custom framework here
     end
 
-    return nil -- Fallback if no valid identifier is found
+    return nil 
 end
 
 function GetPlayer(source)
@@ -203,25 +203,48 @@ function GetInventoryItems(source)
     return {}
 end
 
-function IsPlayerPolice(source)
+function HasPermission(source, action)
+    if source == 0 then return true end 
+    
+    local config = Config.Permissions[action]
+    if not config then return false end
+    
+    if not config.requirePolice then return true end
+    
+    for _, group in ipairs(config.allowedGroups) do
+        if IsPlayerAceAllowed(source, 'group.' .. group) then
+            return true
+        end
+    end
+    
     if Framework == 'esx' then
         local xPlayer = ESX.GetPlayerFromId(source)
         if xPlayer and xPlayer.job and xPlayer.job.name then
-            return xPlayer.job.name == 'police'
+            for _, allowedJob in ipairs(config.allowedJobs) do
+                if xPlayer.job.name == allowedJob then
+                    return true
+                end
+            end
         end
     elseif Framework == 'qbx' then
         local Player = exports.qbx_core:GetPlayer(source)
         if Player and Player.PlayerData and Player.PlayerData.job then
-            return Player.PlayerData.job.name == 'police'
+            for _, allowedJob in ipairs(config.allowedJobs) do
+                if Player.PlayerData.job.name == allowedJob then
+                    return true
+                end
+            end
         end
     elseif Framework == 'qb' then
         local Player = QBCore.Functions.GetPlayer(source)
         if Player and Player.PlayerData and Player.PlayerData.job then
-            return Player.PlayerData.job.name == 'police'
+            for _, allowedJob in ipairs(config.allowedJobs) do
+                if Player.PlayerData.job.name == allowedJob then
+                    return true
+                end
+            end
         end
-    else
-        -- Add custom framework here
     end
-
+    
     return false
 end
