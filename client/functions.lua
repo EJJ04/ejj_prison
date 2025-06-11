@@ -279,34 +279,57 @@ function HideTextUI()
 end
 
 function Menu(menuData)
-    if Config.Menu == 'ox_lib' or not Config.Menu then
+    if Config.Menu == 'ox_lib' then
         if menuData.register then
             lib.registerContext(menuData.data)
         end
         if menuData.show then
-            lib.showContext(menuData.id)
-        end
-        if menuData.hide then
-            lib.hideContext(menuData.onExit or false)
-        end
-        if menuData.getOpen then
-            return lib.getOpenContextMenu()
-        end
-    elseif Config.Menu == 'esx' then
-        if menuData.show then
-            ESX.OpenContext(menuData.position or 'right', menuData.elements, menuData.onSelect, menuData.onClose)
-        elseif menuData.preview then
-            ESX.PreviewContext(menuData.position or 'right', menuData.elements, menuData.onSelect, menuData.onClose)
-        elseif menuData.hide then
-            ESX.CloseContext()
-        elseif menuData.refresh then
-            ESX.RefreshContext(menuData.position or 'right', menuData.elements)
+            lib.showContext(menuData.data.id)
         end
     elseif Config.Menu == 'qb' then
         if menuData.show then
-            exports['qb-menu']:openMenu(menuData.data, menuData.sort or false, menuData.skipFirst or false)
-        elseif menuData.hide then
-            exports['qb-menu']:closeMenu()
+            local qbMenuItems = {}
+            
+            if menuData.data.title then
+                table.insert(qbMenuItems, {
+                    header = menuData.data.title,
+                    isMenuHeader = true
+                })
+            end
+            
+            if menuData.data.options then
+                for _, option in ipairs(menuData.data.options) do
+                    local qbItem = {
+                        header = option.title,
+                        txt = option.description,
+                        icon = option.icon,
+                        disabled = option.disabled,
+                        hidden = option.hidden
+                    }
+                    
+                    if option.onSelect then
+                        qbItem.action = option.onSelect
+                    end
+                    
+                    table.insert(qbMenuItems, qbItem)
+                end
+            end
+            
+            exports['qb-menu']:openMenu(qbMenuItems)
+        end
+    elseif Config.Menu == 'esx' then
+        if menuData.show then
+            ESX.UI.Menu.Open('default', GetCurrentResourceName(), menuData.data.id, {
+                title = menuData.data.title,
+                align = 'top-left',
+                elements = menuData.data.options
+            }, function(data, menu)
+                if data.current.onSelect then
+                    data.current.onSelect()
+                end
+            end, function(data, menu)
+                menu.close()
+            end)
         end
     end
 end
@@ -478,13 +501,41 @@ function GetOpenMenu()
     return nil
 end
 
-function IsPlayerPolice()
+function HasPermission(action)
     local playerData = GetPlayerData()
-
-    if playerData.job.name == 'police' or playerData.job.name == 'sheriff' then
-        return true
+    if not playerData then return false end
+    
+    local config = Config.Permissions[action]
+    if not config then return false end
+    
+    if not config.requirePolice then return true end
+    
+    if Framework == 'esx' then
+        if playerData.job and playerData.job.name then
+            for _, allowedJob in ipairs(config.allowedJobs) do
+                if playerData.job.name == allowedJob then
+                    return true
+                end
+            end
+        end
+    elseif Framework == 'qbx' then
+        if playerData.job and playerData.job.name then
+            for _, allowedJob in ipairs(config.allowedJobs) do
+                if playerData.job.name == allowedJob then
+                    return true
+                end
+            end
+        end
+    elseif Framework == 'qb' then
+        if playerData.job and playerData.job.name then
+            for _, allowedJob in ipairs(config.allowedJobs) do
+                if playerData.job.name == allowedJob then
+                    return true
+                end
+            end
+        end
     end
-
+    
     return false
 end
 
