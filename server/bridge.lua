@@ -86,40 +86,46 @@ function GetPlayer(source)
     end
 end
 
-function AddItem(source, item, count, metadata, slot)
+function AddItem(source, name, count, metadata, slot)
     if Framework == 'esx' then
         local xPlayer = ESX.GetPlayerFromId(source)
-        if not xPlayer then return false end
-        xPlayer.addInventoryItem(item, count) 
-        return true
+        if xPlayer then
+            xPlayer.addInventoryItem(name, count)
+        end
     elseif Framework == 'qbx' then
-        local success, response = exports.ox_inventory:AddItem(source, item, count, metadata, slot)
-        return success
+        exports.ox_inventory:AddItem(source, name, count, metadata)
     elseif Framework == 'qb' then
-        return exports['qb-inventory']:AddItem(source, item, count, slot or false, metadata or false, 'ejj_prison:addItem')
+        local src = tonumber(source)
+        local xPlayer = QBCore.Functions.GetPlayer(src)
+        if xPlayer then
+            xPlayer.Functions.AddItem(name, count, nil, metadata)
+        end
     else
         -- Add custom framework here
     end
-
-    return false
 end
 
-function RemoveItem(source, item, count, metadata, slot)
+function RemoveItem(source, name, count, metadata, slot)
     if Framework == 'esx' then
         local xPlayer = ESX.GetPlayerFromId(source)
-        if not xPlayer then return false end
-        xPlayer.removeInventoryItem(item, count)
-        return true
+        if xPlayer then
+            xPlayer.removeInventoryItem(name, count)
+        end
     elseif Framework == 'qbx' then
-        local success, response = exports.ox_inventory:RemoveItem(source, item, count, metadata, slot)
-        return success
+        exports.ox_inventory:RemoveItem(source, name, count, metadata, slot)
     elseif Framework == 'qb' then
-        return exports['qb-inventory']:RemoveItem(source, item, count, slot or false, 'ejj_prison:removeItem')
+        local src = tonumber(source)
+        local xPlayer = QBCore.Functions.GetPlayer(src)
+        if xPlayer then
+            if slot then
+                xPlayer.Functions.RemoveItem(name, count, slot)
+            else
+                xPlayer.Functions.RemoveItem(name, count)
+            end
+        end
     else
         -- Add custom framework here
     end
-
-    return false
 end
 
 function GetItemCount(source, item)
@@ -142,14 +148,54 @@ end
 function GetInventoryItems(source)
     if Framework == 'esx' then
         local xPlayer = ESX.GetPlayerFromId(source)
+        local items = {}
         if xPlayer and xPlayer.getInventory then
-            return xPlayer.getInventory()
+            local data = xPlayer.getInventory()
+            for i=1, #data do 
+                local item = data[i]
+                items[#items + 1] = {
+                    name = item.name,
+                    label = item.label,
+                    count = item.count,
+                    weight = item.weight,
+                    metadata = item.metadata or item.info,
+                    slot = item.slot or i
+                }
+            end
         end
-    elseif Framework == 'qbx' or Framework == 'qb' then
-        local Player = QBCore.Functions.GetPlayer(source)
-        if Player and Player.PlayerData and Player.PlayerData.items then
-            return Player.PlayerData.items
+        return items
+    elseif Framework == 'qbx' then
+        local items = {}
+        local data = exports.ox_inventory:GetInventoryItems(source)
+        for slot, item in pairs(data) do 
+            items[#items + 1] = {
+                name = item.name,
+                label = item.label,
+                count = item.count,
+                weight = item.weight,
+                metadata = item.metadata,
+                slot = slot
+            }
         end
+        return items
+    elseif Framework == 'qb' then
+        local source = tonumber(source)
+        local xPlayer = QBCore.Functions.GetPlayer(source)
+        local items = {}
+        if xPlayer and xPlayer.PlayerData and xPlayer.PlayerData.items then
+            local data = xPlayer.PlayerData.items
+            for slot, item in pairs(data) do 
+                items[#items + 1] = {
+                    name = item.name,
+                    label = item.label,
+                    count = item.amount,
+                    weight = item.weight,
+                    metadata = item.info,
+                    slot = slot
+                }
+            end
+        end
+        return items
     else
         -- Add custom framework here
     end
