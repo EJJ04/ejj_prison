@@ -48,7 +48,7 @@ Config.Permissions = {
 }
 
 -- How many skill checks do players need to complete for jobs? 3 seems fair - not too easy, not too hard
-Config.MinigameTries = 3
+Config.MinigameTries = 1
 
 -- The guard NPC that players interact with for jobs and stuff
 Config.Guard = {
@@ -75,8 +75,12 @@ Config.PrisonClothes = {
     hat = { component_id = 0, drawable = -1, texture = 0 } -- No hat for prisoners
 }
 
--- All the important locations in the prison - change these if you're using a different prison interior
-Config.Locations = {
+-- Multiple prison support - add more prisons here
+Config.Prisons = {
+    bolingbroke = {
+        enabled = true, -- Set to false to disable this prison
+        name = 'Bolingbroke Penitentiary',
+        locations = {
     jail = vector4(1769.2166, 2552.5620, 45.5650, 0.0), -- Where players spawn when they get jailed
     release = vector4(1846.9674, 2585.8567, 45.6726, 269.4901), -- Where they go when released
     guard = vector4(1752.9586, 2566.7290, 44.5650, 224.2271), -- Where the guard NPC stands
@@ -92,6 +96,7 @@ Config.Locations = {
         pushups = vector4(1742.8623, 2480.6362, 45.7593, 120.2251),
         weights = vector4(1745.6586, 2483.7991, 45.7407, 208.9112),
         situps = vector4(1744.1934, 2479.4695, 45.7593, 123.2899)
+            }
     },
     blip = { -- Prison blip configuration for the map
         enabled = true, -- Set to false to disable the prison blip
@@ -101,8 +106,192 @@ Config.Locations = {
         scale = 1.0, -- Size of the blip (0.5 = small, 1.0 = normal, 1.5 = large)
         name = 'Bolingbroke Penitentiary', -- Label that appears when hovering over blip
         shortRange = false -- Set to true if blip should only show when nearby, false to always show
+        },
+        hospital = { -- Where players go if they get hurt and need medical attention while in prison
+            coords = vector4(1768.1671, 2570.3691, 45.7298, 138.9697) -- Prison medical facility
+        },
+        shop = { -- Prison shop where players can buy food and water while jailed
+            ped = { -- The NPC that runs the shop
+                model = 's_m_m_prisguard_01', -- Another prison guard
+                coords = vector4(1783.2460, 2560.7188, 44.6731, 179.2982), -- Where he stands
+                radius = 2.5 -- How close players need to be to shop
+            },
+            blip = { -- Blip configuration for the shop (only visible to jailed players)
+                sprite = 52, -- Shop/store icon
+                color = 2, -- Green color
+                scale = 0.8, -- Medium size
+                name = 'Prison Canteen' -- What appears on map
+            },
+            items = { -- What's available in the shop
+                {
+                    name = 'water', -- Item name (must match your items.lua or database)
+                    label = 'Water Bottle', -- What players see
+                    price = 0, -- Free water because prison
+                    icon = 'fas fa-tint' -- Water drop icon
+                },
+                {
+                    name = 'burger', -- Food item
+                    label = 'Prison Burger', -- Probably not very tasty
+                    price = 0, -- Also free
+                    icon = 'fas fa-hamburger' -- Burger icon
+                }
+            }
+        },
+        crafting = { -- Crafting system - players collect materials to make escape tools
+            prisoner = { -- The prisoner NPC who helps with crafting
+                model = 's_m_y_prisoner_01', -- Prisoner model
+                coords = vector4(1762.0648, 2473.6333, 44.7408, 29.9728), -- Where he hangs out
+                radius = 2.0 -- How close to interact
+            },
+            resources = { -- Materials players can find around the prison
+                metal = { -- Metal scraps
+                    coords = vector3(1777.5552, 2563.5906, 45.6731), -- Location to find metal
+                    radius = 1.5, -- How close to pick up
+                    item = 'metal_scrap', -- Item name
+                    label = 'Metal Scrap', -- Display name
+                    icon = 'fas fa-cogs', -- Metal gear icon
+                    object = false -- No physical object spawns (invisible pickup)
+                },
+                wood = { -- Wood planks
+                    coords = vector4(1690.255, 2553.248, 44.268, 90.129), -- Where to find wood
+                    radius = 1.5,
+                    item = 'wood_plank',
+                    label = 'Wood Plank',
+                    icon = 'fas fa-tree', -- Tree icon
+                    object = { -- Physical object that appears
+                        model = 'prop_rub_planks_04', -- Wooden planks model
+                        respawnTime = 30000 -- Respawns after 30 seconds
+                    }
+                },
+                ducttape = { -- Duct tape for holding stuff together
+                    coords = vector4(1753.173, 2472.894, 45.394, -50.612), -- Tape location
+                    radius = 1.5,
+                    item = 'duct_tape',
+                    label = 'Duct Tape',
+                    icon = 'fas fa-tape', -- Tape icon
+                    object = {
+                        model = 'prop_gaffer_tape', -- Tape roll model
+                        respawnTime = 25000 -- Respawns after 25 seconds
+                    }
+                }
+            },
+            recipes = { -- What players can craft with the materials
+                shovel = { -- The escape tool
+                    label = 'Prison Shovel', -- What it's called
+                    icon = 'fas fa-shovel', -- Shovel icon
+                    ingredients = { -- What you need to make it
+                        metal_scrap = 1, -- 1 metal scrap
+                        wood_plank = 1, -- 1 wood plank
+                        duct_tape = 1 -- 1 duct tape
+                    },
+                    result = { -- What you get
+                        item = 'shovel', -- Shovel item
+                        count = 1 -- You get one shovel
+                    }
+                }
+            }
+        },
+        escape = { -- Prison escape system - the fun part! Players can dig tunnels to break out
+            resetTime = 30, -- How long until tunnel disappears (minutes) - prevents permanent escapes
+            digging = { -- Where players can start digging the tunnel
+                coords = vector4(1774.6844, 2480.8213, 45.7408, 209.5112), -- Digging location
+                radius = 1.5, -- How close they need to be
+                requiredItem = 'shovel', -- What item they need to dig (crafted from materials)
+                removeShovel = true, -- Should we take their shovel after digging? Set false to keep it
+                animation = { -- The digging animation - looks pretty cool
+                    dict = 'random@burial',
+                    anim = 'a_burial',
+                    duration = 10000, -- 10 seconds of digging
+                    props = { -- Props that appear while digging
+                        {
+                            bone = 28422, -- Hand bone
+                            model = 'prop_tool_shovel', -- Shovel prop
+                            placement = {
+                                pos = vector3(0.0, 0.0, 0.24),
+                                rot = vector3(0.0, 0.0, 0.0)
+                            }
+                        },
+                        {
+                            bone = 28422,
+                            model = 'prop_ld_shovel_dirt', -- Dirt on shovel prop
+                            placement = {
+                                pos = vector3(0.0, 0.0, 0.24),
+                                rot = vector3(0.0, 0.0, 0.0)
+                            }
+                        }
+                    }
+                },
+                tunnelRock = { -- The rock that appears at tunnel entrance
+                    coords = vector3(1775.223, 2479.969, 44.557),
+                    model = 'prop_rock_1_i'
+                }
+            },
+            exit = { -- Where the tunnel exits (outside prison walls)
+                coords = vector4(1803.2581, 2436.7910, 45.7550, 214.3743), -- Exit location
+                radius = 1.5, -- How close to get to exit
+                exitRock = { -- Rock that appears at exit
+                    coords = vector3(1803.306, 2436.779, 44.531),
+                    model = 'prop_rock_1_i'
+                }
+            },
+            alarm = { -- Prison alarms when someone escapes
+                enabled = true, -- Set false to disable alarms
+                name = 'PRISON_ALARMS', -- Sound name
+                duration = 60000, -- How long alarms last (60 seconds)
+                maxDistance = 500.0, -- How far away you can hear them
+                center = vector3(1774.6844, 2480.8213, 45.7408) -- Where sound comes from
+            }
+        },
+        zone = { -- Prison boundary zone - this prevents players from escaping by just walking out
+            enabled = true, -- Set to false if you don't want zone restrictions
+            name = 'ejj_prison_zone_bolingbroke', -- Internal name for the zone
+            points = { -- These points create the prison boundary - adjust for your prison layout
+                vector3(1896.0, 2593.0, 46.0),
+                vector3(1897.0, 2517.0, 46.0),
+                vector3(1795.0, 2385.0, 46.0),
+                vector3(1685.0, 2361.0, 46.0),
+                vector3(1496.0, 2426.0, 46.0),
+                vector3(1499.0, 2640.0, 46.0),
+                vector3(1681.0, 2811.0, 46.0),
+                vector3(1887.0, 2736.0, 46.0),
+            },
+            thickness = 52.0 -- How thick the boundary zone is
+        }
+    }
+    -- Add more prisons here - they will all run simultaneously:
+    -- sandy_shores = {
+    --     enabled = true,
+    --     name = 'Sandy Shores Correctional',
+    --     locations = { ... },
+    --     blip = { ... },
+    --     hospital = { ... },
+    --     shop = { ... },
+    --     crafting = { ... },
+    --     escape = { ... },
+    --     zone = { ... }
+    -- }
+}
+
+-- Database integration settings
+Config.Database = {
+    -- Column name in ejj_prison table that stores prison ID
+    prisonColumn = 'prison',
+    
+    -- SQL queries for multi-prison support (examples for server-side implementation)
+    queries = {
+        -- Get player's assigned prison
+        getPlayerPrison = "SELECT prison FROM ejj_prison WHERE identifier = ?",
+        
+        -- Set player's prison assignment
+        setPlayerPrison = "UPDATE ejj_prison SET prison = ? WHERE identifier = ?",
+        
+        -- Get all players in a specific prison
+        getPrisonPlayers = "SELECT * FROM ejj_prison WHERE prison = ? AND time > 0"
     }
 }
+
+-- Currently active prison (can be changed dynamically in the future for multi-prison support)
+Config.CurrentPrison = 'bolingbroke'
 
 -- How close players need to be to interact with job locations
 Config.JobZones = {
@@ -124,9 +313,14 @@ Config.JobCooldown = 5 -- 5 minutes seems reasonable
 -- How much time gets taken off their sentence for completing each job
 -- Electrical work pays the most because it's harder, cooking pays least
 Config.JobRewards = {
-    cooking = 5, -- 5 minutes off sentence
-    electrician = 10, -- 10 minutes off sentence  
-    training = 7 -- 7 minutes off sentence
+    cooking = 5, -- 5 minutes off sentence for cooking job
+    electrician = {5, 5, 10, 10}, -- Per electrical box: 4 boxes, each with its own reward
+    training = {
+        chinups = 3,
+        pushups = 3,
+        weights = 5,
+        situps = 4
+    }
 }
 
 -- Map blips for job locations - these show up on the map so players can find the jobs
@@ -151,29 +345,6 @@ Config.JobBlips = {
     }
 }
 
--- Prison boundary zone - this prevents players from escaping by just walking out
--- If you're using a different prison, you'll need to update these coordinates
-Config.PrisonZone = {
-    enabled = true, -- Set to false if you don't want zone restrictions
-    name = 'ejj_prison_zone', -- Internal name for the zone
-    points = { -- These points create the prison boundary - adjust for your prison layout
-        vector3(1896.0, 2593.0, 46.0),
-        vector3(1897.0, 2517.0, 46.0),
-        vector3(1795.0, 2385.0, 46.0),
-        vector3(1685.0, 2361.0, 46.0),
-        vector3(1496.0, 2426.0, 46.0),
-        vector3(1499.0, 2640.0, 46.0),
-        vector3(1681.0, 2811.0, 46.0),
-        vector3(1887.0, 2736.0, 46.0),
-    },
-    thickness = 52.0 -- How thick the boundary zone is
-}
-
--- Where players go if they get hurt and need medical attention while in prison
-Config.Hospital = {
-    coords = vector4(1768.1671, 2570.3691, 45.7298, 138.9697) -- Prison medical facility
-}
-
 -- Dispatch system settings - alerts police when someone breaks out of prison
 Config.Dispatch = {
     enabled = true, -- Set to false if you don't want dispatch alerts
@@ -193,140 +364,29 @@ Config.Dispatch = {
     }
 }
 
--- Prison escape system - the fun part! Players can dig tunnels to break out
-Config.Escape = {
-    resetTime = 30, -- How long until tunnel disappears (minutes) - prevents permanent escapes
-    digging = { -- Where players can start digging the tunnel
-        coords = vector4(1774.6844, 2480.8213, 45.7408, 209.5112), -- Digging location
-        radius = 1.5, -- How close they need to be
-        requiredItem = 'shovel', -- What item they need to dig (crafted from materials)
-        removeShovel = true, -- Should we take their shovel after digging? Set false to keep it
-        animation = { -- The digging animation - looks pretty cool
-            dict = 'random@burial',
-            anim = 'a_burial',
-            duration = 10000, -- 10 seconds of digging
-            props = { -- Props that appear while digging
-                {
-                    bone = 28422, -- Hand bone
-                    model = 'prop_tool_shovel', -- Shovel prop
-                    placement = {
-                        pos = vector3(0.0, 0.0, 0.24),
-                        rot = vector3(0.0, 0.0, 0.0)
-                    }
-                },
-                {
-                    bone = 28422,
-                    model = 'prop_ld_shovel_dirt', -- Dirt on shovel prop
-                    placement = {
-                        pos = vector3(0.0, 0.0, 0.24),
-                        rot = vector3(0.0, 0.0, 0.0)
-                    }
-                }
-            }
-        },
-        tunnelRock = { -- The rock that appears at tunnel entrance
-            coords = vector3(1775.223, 2479.969, 44.557),
-            model = 'prop_rock_1_i'
-        }
-    },
-    exit = { -- Where the tunnel exits (outside prison walls)
-        coords = vector4(1803.2581, 2436.7910, 45.7550, 214.3743), -- Exit location
-        radius = 1.5, -- How close to get to exit
-        exitRock = { -- Rock that appears at exit
-            coords = vector3(1803.306, 2436.779, 44.531),
-            model = 'prop_rock_1_i'
-        }
-    },
-    alarm = { -- Prison alarms when someone escapes
-        enabled = true, -- Set false to disable alarms
-        name = 'PRISON_ALARMS', -- Sound name
-        duration = 60000, -- How long alarms last (60 seconds)
-        maxDistance = 500.0, -- How far away you can hear them
-        center = vector3(1774.6844, 2480.8213, 45.7408) -- Where sound comes from
-    }
+Config.RequirePoliceForJail = true -- Set to false to allow anyone (or AI) to use jail/unjail commands
+
+Config.ResourcePickupAnimation = {
+    dict = 'amb@prop_human_bum_bin@base',
+    anim = 'base',
+    duration = 3500 -- milliseconds
 }
 
--- Prison shop where players can buy food and water while jailed
-Config.Shop = {
-    ped = { -- The NPC that runs the shop
-        model = 's_m_m_prisguard_01', -- Another prison guard
-        coords = vector4(1783.2460, 2560.7188, 44.6731, 179.2982), -- Where he stands
-        radius = 2.5 -- How close players need to be to shop
+Config.JobAnimations = {
+    cooking = {
+        dict = 'amb@prop_human_bbq@male@base',
+        anim = 'base',
+        duration = 10000
     },
-    blip = { -- Blip configuration for the shop (only visible to jailed players)
-        sprite = 52, -- Shop/store icon
-        color = 2, -- Green color
-        scale = 0.8, -- Medium size
-        name = 'Prison Canteen' -- What appears on map
+    electrician = {
+        dict = 'anim@amb@clubhouse@tutorial@bkr_tut_ig3@',
+        anim = 'machinic_loop_mechandplayer',
+        duration = 8000
     },
-    items = { -- What's available in the shop
-        {
-            name = 'water', -- Item name (must match your items.lua or database)
-            label = 'Water Bottle', -- What players see
-            price = 0, -- Free water because prison
-            icon = 'fas fa-tint' -- Water drop icon
-        },
-        {
-            name = 'burger', -- Food item
-            label = 'Prison Burger', -- Probably not very tasty
-            price = 0, -- Also free
-            icon = 'fas fa-hamburger' -- Burger icon
-        }
-    }
-}
-
--- Crafting system - players collect materials to make escape tools
-Config.Crafting = {
-    prisoner = { -- The prisoner NPC who helps with crafting
-        model = 's_m_y_prisoner_01', -- Prisoner model
-        coords = vector4(1762.0648, 2473.6333, 44.7408, 29.9728), -- Where he hangs out
-        radius = 2.0 -- How close to interact
-    },
-    resources = { -- Materials players can find around the prison
-        metal = { -- Metal scraps
-            coords = vector3(1777.5552, 2563.5906, 45.6731), -- Location to find metal
-            radius = 1.5, -- How close to pick up
-            item = 'metal_scrap', -- Item name
-            label = 'Metal Scrap', -- Display name
-            icon = 'fas fa-cogs', -- Metal gear icon
-            object = false -- No physical object spawns (invisible pickup)
-        },
-        wood = { -- Wood planks
-            coords = vector4(1690.255, 2553.248, 44.268, 90.129), -- Where to find wood
-            radius = 1.5,
-            item = 'wood_plank',
-            label = 'Wood Plank',
-            icon = 'fas fa-tree', -- Tree icon
-            object = { -- Physical object that appears
-                model = 'prop_rub_planks_04', -- Wooden planks model
-                respawnTime = 30000 -- Respawns after 30 seconds
-            }
-        },
-        ducttape = { -- Duct tape for holding stuff together
-            coords = vector4(1753.173, 2472.894, 45.394, -50.612), -- Tape location
-            radius = 1.5,
-            item = 'duct_tape',
-            label = 'Duct Tape',
-            icon = 'fas fa-tape', -- Tape icon
-            object = {
-                model = 'prop_gaffer_tape', -- Tape roll model
-                respawnTime = 25000 -- Respawns after 25 seconds
-            }
-        }
-    },
-    recipes = { -- What players can craft with the materials
-        shovel = { -- The escape tool
-            label = 'Prison Shovel', -- What it's called
-            icon = 'fas fa-shovel', -- Shovel icon
-            ingredients = { -- What you need to make it
-                metal_scrap = 1, -- 2 metal scraps
-                wood_plank = 1, -- 1 wood plank
-                duct_tape = 1 -- 1 duct tape
-            },
-            result = { -- What you get
-                item = 'shovel', -- Shovel item
-                count = 1 -- You get one shovel
-            }
-        }
+    training = {
+        chinups = { dict = 'amb@prop_human_muscle_chin_ups@male@base', anim = 'base', duration = 10000 },
+        pushups = { dict = 'amb@world_human_push_ups@male@base', anim = 'base', duration = 10000 },
+        weights = { dict = 'amb@world_human_muscle_free_weights@male@barbell@base', anim = 'base', duration = 10000 },
+        situps = { dict = 'amb@world_human_sit_ups@male@base', anim = 'base', duration = 10000 }
     }
 }
