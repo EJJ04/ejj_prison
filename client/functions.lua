@@ -21,7 +21,6 @@ function StartMinigame()
     local totalTries = Config.MinigameTries or 1
     
     if Config.Minigame == 'ox_lib' then
-        -- Using ox_lib skillCheck
         local difficulties = {'easy', 'medium', 'hard'}
         
         for i = 1, totalTries do

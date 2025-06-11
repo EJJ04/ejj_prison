@@ -11,6 +11,14 @@ local function InitializeFramework()
             PlayerData = xPlayer
             PlayerLoaded = true
             TriggerServerEvent('ejj_prison:checkOfflineTime')
+            -- Initialize prison status
+            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
+            if jailTime and jailTime > 0 then
+                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
+                if currentPrison then
+                    InitializePrisonSystem(currentPrison)
+                end
+            end
         end)
 
         RegisterNetEvent('esx:onPlayerLogout', function()
@@ -23,6 +31,14 @@ local function InitializeFramework()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             TriggerServerEvent('ejj_prison:checkOfflineTime')
+            -- Initialize prison status
+            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
+            if jailTime and jailTime > 0 then
+                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
+                if currentPrison then
+                    InitializePrisonSystem(currentPrison)
+                end
+            end
         end)
 
     elseif GetResourceState('qbx_core') == 'started' then
@@ -32,6 +48,14 @@ local function InitializeFramework()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             TriggerServerEvent('ejj_prison:checkOfflineTime')
+            -- Initialize prison status
+            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
+            if jailTime and jailTime > 0 then
+                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
+                if currentPrison then
+                    InitializePrisonSystem(currentPrison)
+                end
+            end
         end)
 
         RegisterNetEvent('qbx_core:client:playerLoggedOut', function()
@@ -44,6 +68,14 @@ local function InitializeFramework()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             TriggerServerEvent('ejj_prison:checkOfflineTime')
+            -- Initialize prison status
+            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
+            if jailTime and jailTime > 0 then
+                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
+                if currentPrison then
+                    InitializePrisonSystem(currentPrison)
+                end
+            end
         end)
     elseif GetResourceState('qb-core') == 'started' then
         QBCore = exports['qb-core']:GetCoreObject()
@@ -53,6 +85,14 @@ local function InitializeFramework()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             TriggerServerEvent('ejj_prison:checkOfflineTime')
+            -- Initialize prison status
+            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
+            if jailTime and jailTime > 0 then
+                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
+                if currentPrison then
+                    InitializePrisonSystem(currentPrison)
+                end
+            end
         end)
 
         RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -65,6 +105,14 @@ local function InitializeFramework()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             TriggerServerEvent('ejj_prison:checkOfflineTime')
+            -- Initialize prison status
+            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
+            if jailTime and jailTime > 0 then
+                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
+                if currentPrison then
+                    InitializePrisonSystem(currentPrison)
+                end
+            end
         end)
     else
         -- Add custom framework here
