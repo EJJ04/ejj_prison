@@ -13,8 +13,8 @@ client_scripts {
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
     'server/bridge.lua',
-    'server/main.lua',
     'server/logs.lua',
+    'server/main.lua',
 }
 
 shared_scripts {
