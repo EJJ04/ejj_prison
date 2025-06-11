@@ -234,7 +234,7 @@ function StartDigging()
     
     if success then
         HideTextUI()
-        TriggerServerEvent('ejj_prison:tunnelDug')
+        TriggerServerEvent('ejj_prison:server:tunnelActivity', "Tunnel dug")
         Notify(locale('tunnel_dug_success'), 'success')
     else
         Notify(locale('tunnel_dig_failed'), 'error')
@@ -535,10 +535,10 @@ function PerformCookingTask()
     local anim = Config.JobAnimations.cooking
     lib.playAnim(cache.ped, anim.dict, anim.anim, 8.0, 8.0, anim.duration, 1, 0, false, false, false)
     local success = StartMinigame()
-    ClearPedTasksImmediately(cache.ped)
+                ClearPedTasksImmediately(cache.ped)
     if success then
         HideTextUI()
-        TriggerServerEvent('ejj_prison:completeJob', 'cooking')
+        TriggerServerEvent('ejj_prison:server:jobCompleted', 'cooking', 0)
         Notify(locale('job_completed_cooking'), 'success')
     else
         Notify(locale('job_failed_cooking'), 'error')
@@ -558,7 +558,7 @@ function PerformElectricalTask(boxId)
         local prisonConfig = GetPrisonConfig(currentPrison)
         local totalBoxes = prisonConfig and prisonConfig.locations.electrical and #prisonConfig.locations.electrical or 0
         if #completedElectricalBoxes >= totalBoxes then
-            TriggerServerEvent('ejj_prison:completeJob', 'electrician', boxId)
+            TriggerServerEvent('ejj_prison:server:jobCompleted', 'electrician', boxId)
             Notify(locale('job_completed_electrician'), 'success')
             ClearJobPoints()
         else
@@ -566,9 +566,9 @@ function PerformElectricalTask(boxId)
         end
     else
         Notify(locale('electrical_repair_failed'), 'error')
+        end
     end
-end
-
+    
 function PerformTrainingTask(trainingType, coords)
     local anim = Config.JobAnimations.training[trainingType]
     if anim then
@@ -579,12 +579,12 @@ function PerformTrainingTask(trainingType, coords)
         ClearPedTasksImmediately(cache.ped)
         if success then
             HideTextUI()
-            TriggerServerEvent('ejj_prison:completeJob', 'training', trainingType)
+            TriggerServerEvent('ejj_prison:server:jobCompleted', 'training', trainingType)
             Notify(locale('job_completed_training'), 'success')
         else
             Notify(locale('job_failed_training'), 'error')
+            end
         end
-    end
     ClearJobPoints()
 end
 
@@ -631,10 +631,7 @@ function InitializeResourceSystem(prisonId)
         
         function point:nearby()
             if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
-                lib.playAnim(cache.ped, Config.ResourcePickupAnimation.dict, Config.ResourcePickupAnimation.anim, 8.0, 8.0, Config.ResourcePickupAnimation.duration, 49, 0, false, false, false)
-                Wait(Config.ResourcePickupAnimation.duration)
-                ClearPedTasksImmediately(cache.ped)
-                TriggerServerEvent('ejj_prison:pickupResource', resourceConfig.item)
+                TriggerServerEvent('ejj_prison:server:resourcePickup', resourceConfig.item)
             end
         end
         
@@ -690,7 +687,7 @@ function HandleShopInteraction(prisonId)
             description = locale('shop_item_price', item.price),
             icon = item.icon,
             onSelect = function()
-                TriggerServerEvent('ejj_prison:buyShopItem', item.name, item.price)
+                TriggerServerEvent('ejj_prison:server:shopPurchase', item)
             end
         })
     end
@@ -764,8 +761,8 @@ function HandleCraftingInteraction(prisonId)
             disabled = not canCraft,
             onSelect = function()
                 if canCraft then
-                    TriggerServerEvent('ejj_prison:craftItem', recipeId)
-                    end
+                    TriggerServerEvent('ejj_prison:server:itemCraft', recipeId)
+                end
             end
         })
     end
