@@ -17,7 +17,7 @@ Config.TextUIPosition = 'left-center'
 
 -- Which menu system to use for interactions like the shop and crafting
 -- Options: 'ox_lib' (modern, recommended), 'esx' (ESX context menus), 'qb' (QB menu system)
-Config.Menu = 'qb'
+Config.Menu = 'ox_lib'
 
 -- Which minigame system to use for skill checks? Options: 'ox_lib' (ox_lib skillCheck), 'qb' (qb-minigames)
 Config.Minigame = 'ox_lib'
