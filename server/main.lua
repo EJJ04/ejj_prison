@@ -198,7 +198,7 @@ function RestorePlayerJail(playerId, prisonId)
         TriggerClientEvent('ejj_prison:client:setJailStatus', playerId, true)
         TriggerClientEvent('ejj_prison:client:setJailTime', playerId, jailTime)
         TriggerClientEvent('ejj_prison:client:setPrisonId', playerId, prisonId)
-        TriggerClientEvent('ejj_prison:client:setJailClothes', playerId)
+        TriggerClientEvent('ejj_prison:changeToPrisonClothes', playerId)
     end
 end
 
@@ -257,18 +257,6 @@ end)
 AddEventHandler('onResourceStop', function(resourceName)
     if GetCurrentResourceName() == resourceName then
         StopPrisonTimer()
-    end
-end)
-
-AddEventHandler('playerJoining', function()
-    local source = source
-    local identifier = GetIdentifier(source)
-    if identifier then
-        local jailTime = CheckJailTime(source)
-        if jailTime and jailTime > 0 then
-            local prisonId = GetPlayerPrison(source)
-            RestorePlayerJail(source, prisonId)
-        end
     end
 end)
 

@@ -6,7 +6,34 @@ local function InitializeFramework()
         Framework = 'esx'
         
         AddEventHandler('esx:playerLoaded', function(playerId, xPlayer, isNew)
-            TriggerEvent('ejj_prison:playerLoaded', playerId)
+            local identifier = GetIdentifier(playerId)
+            if identifier then
+                local result = MySQL.query.await('SELECT time, prison, UNIX_TIMESTAMP(date) as start_time FROM ejj_prison WHERE identifier = ?', {identifier})
+                if result and result[1] and result[1].time > 0 then
+                    local jailTime = result[1].time
+                    local prisonId = result[1].prison
+                    local startTime = result[1].start_time
+                    
+                    if Config.OfflineTimeServing then
+                        local currentTime = os.time()
+                        local elapsedMinutes = math.floor((currentTime - startTime) / 60)
+                        local remainingTime = math.max(0, jailTime - elapsedMinutes)
+                        
+                        if remainingTime > 0 then
+                            MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {remainingTime, identifier})
+                            jailTime = remainingTime
+                        else
+                            jailTime = 0
+                        end
+                    end
+                    
+                    if jailTime > 0 then
+                        TriggerEvent('ejj_prison:playerLoaded', playerId)
+                    else
+                        MySQL.update('UPDATE ejj_prison SET time = 0, prison = NULL WHERE identifier = ?', {identifier})
+                    end
+                end
+            end
         end)
         
         AddEventHandler('esx:playerDropped', function(playerId)
@@ -17,7 +44,34 @@ local function InitializeFramework()
         Framework = 'qbx'
         
         AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
-            TriggerEvent('ejj_prison:playerLoaded', Player.PlayerData.source)
+            local identifier = GetIdentifier(Player.PlayerData.source)
+            if identifier then
+                local result = MySQL.query.await('SELECT time, prison, UNIX_TIMESTAMP(date) as start_time FROM ejj_prison WHERE identifier = ?', {identifier})
+                if result and result[1] and result[1].time > 0 then
+                    local jailTime = result[1].time
+                    local prisonId = result[1].prison
+                    local startTime = result[1].start_time
+                    
+                    if Config.OfflineTimeServing then
+                        local currentTime = os.time()
+                        local elapsedMinutes = math.floor((currentTime - startTime) / 60)
+                        local remainingTime = math.max(0, jailTime - elapsedMinutes)
+                        
+                        if remainingTime > 0 then
+                            MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {remainingTime, identifier})
+                            jailTime = remainingTime
+                        else
+                            jailTime = 0
+                        end
+                    end
+                    
+                    if jailTime > 0 then
+                        TriggerEvent('ejj_prison:playerLoaded', Player.PlayerData.source)
+                    else
+                        MySQL.update('UPDATE ejj_prison SET time = 0, prison = NULL WHERE identifier = ?', {identifier})
+                    end
+                end
+            end
         end)
         
         AddEventHandler('QBCore:Server:OnPlayerUnload', function(src)
@@ -29,7 +83,34 @@ local function InitializeFramework()
         Framework = 'qb'
         
         AddEventHandler('QBCore:Server:PlayerLoaded', function(Player)
-            TriggerEvent('ejj_prison:playerLoaded', Player.PlayerData.source)
+            local identifier = GetIdentifier(Player.PlayerData.source)
+            if identifier then
+                local result = MySQL.query.await('SELECT time, prison, UNIX_TIMESTAMP(date) as start_time FROM ejj_prison WHERE identifier = ?', {identifier})
+                if result and result[1] and result[1].time > 0 then
+                    local jailTime = result[1].time
+                    local prisonId = result[1].prison
+                    local startTime = result[1].start_time
+                    
+                    if Config.OfflineTimeServing then
+                        local currentTime = os.time()
+                        local elapsedMinutes = math.floor((currentTime - startTime) / 60)
+                        local remainingTime = math.max(0, jailTime - elapsedMinutes)
+                        
+                        if remainingTime > 0 then
+                            MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {remainingTime, identifier})
+                            jailTime = remainingTime
+                        else
+                            jailTime = 0
+                        end
+                    end
+                    
+                    if jailTime > 0 then
+                        TriggerEvent('ejj_prison:playerLoaded', Player.PlayerData.source)
+                    else
+                        MySQL.update('UPDATE ejj_prison SET time = 0, prison = NULL WHERE identifier = ?', {identifier})
+                    end
+                end
+            end
         end)
         
         AddEventHandler('QBCore:Server:OnPlayerUnload', function(src)
