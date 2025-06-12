@@ -22,9 +22,6 @@ Config.Menu = 'ox_lib'
 -- Which minigame system to use for skill checks? Options: 'ox_lib' (ox_lib skillCheck), 'qb' (qb-minigames)
 Config.Minigame = 'ox_lib'
 
--- How should we display jail time? Options: 'minutes' (recommended), 'hours', 'seconds'
-Config.TimeFormat = 'minutes'
-
 -- Should players be able to serve prison time while offline? Set to true to enable offline time serving
 Config.OfflineTimeServing = true
 
