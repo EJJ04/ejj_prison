@@ -707,7 +707,7 @@ RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
     LogCrafting(playerName, recipeId, true, "Crafting")
 end)
 
-exports('JailPlayer', function(source, targetId, duration, reason, prisonId)
+exports('JailPlayer', function(source, targetId, duration, prisonId)
     if not HasPermission(source, 'jail') then
         TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
         return false
