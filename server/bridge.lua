@@ -167,63 +167,109 @@ function GetPlayer(source)
     end
 end
 
-function AddItem(source, name, count, metadata, slot)
-    if Framework == 'esx' then
-        local xPlayer = ESX.GetPlayerFromId(source)
-        if xPlayer then
-            xPlayer.addInventoryItem(name, count)
-        end
-    elseif Framework == 'qbx' then
-        exports.ox_inventory:AddItem(source, name, count, metadata)
-    elseif Framework == 'qb' then
-        local src = tonumber(source)
-        local xPlayer = QBCore.Functions.GetPlayer(src)
-        if xPlayer then
-            xPlayer.Functions.AddItem(name, count, nil, metadata)
-        end
+local codemInv = 'codem-inventory'
+local oxInv = 'ox_inventory'
+local qbInv = 'qb-inventory'
+local qsInv = 'qs-inventory'
+local origenInv = 'origen_inventory'
+
+local inventorySystem
+if GetResourceState(codemInv) == 'started' then
+    inventorySystem = 'codem'
+elseif GetResourceState(oxInv) == 'started' then
+    inventorySystem = 'ox'
+elseif GetResourceState(qbInv) == 'started' then
+    inventorySystem = 'qb'
+elseif GetResourceState(qsInv) == 'started' then
+    inventorySystem = 'qs'
+elseif GetResourceState(origenInv) == 'started' then
+    inventorySystem = 'origen'
+end
+
+function AddItem(player, item, count, metadata, slot, source)
+    if inventorySystem == 'codem' then
+        return exports[codemInv]:AddItem(source, item, count, slot or false, metadata or false)
+    elseif inventorySystem == 'ox' then
+        return exports[oxInv]:AddItem(source, item, count, metadata or false, slot or false)
+    elseif inventorySystem == 'qb' then
+        exports[qbInv]:AddItem(source, item, count, slot or false, metadata or false, 'ejj_prison:AddItem')
+        TriggerClientEvent('qb-inventory:client:ItemBox', source, QBCore.Shared.Items[item], 'add', count)
+        return
+    elseif inventorySystem == 'qs' then
+        return exports[qsInv]:AddItem(source, item, count, slot or false, metadata or false)
+    elseif inventorySystem == 'origen' then
+        return exports[origenInv]:addItem(source, item, count, metadata, slot)
     else
-        -- Add custom framework here
+        if Framework == 'esx' then
+            return player.addInventoryItem(item, count, metadata, slot)
+        elseif Framework == 'qb' then
+            player.Functions.AddItem(item, count, slot, metadata)
+            TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[item], 'add', count)
+            return
+        else
+            error("Unsupported framework or inventory state for AddItem.")
+        end
     end
 end
 
-function RemoveItem(source, name, count, metadata, slot)
-    if Framework == 'esx' then
-        local xPlayer = ESX.GetPlayerFromId(source)
-        if xPlayer then
-            xPlayer.removeInventoryItem(name, count)
-        end
-    elseif Framework == 'qbx' then
-        exports.ox_inventory:RemoveItem(source, name, count, metadata, slot)
-    elseif Framework == 'qb' then
-        local src = tonumber(source)
-        local xPlayer = QBCore.Functions.GetPlayer(src)
-        if xPlayer then
-            if slot then
-                xPlayer.Functions.RemoveItem(name, count, slot)
-            else
-                xPlayer.Functions.RemoveItem(name, count)
-            end
-        end
+function RemoveItem(player, item, count, metadata, slot, source)
+    if inventorySystem == 'codem' then
+        return exports[codemInv]:RemoveItem(source, item, count, slot or false)
+    elseif inventorySystem == 'ox' then
+        return exports[oxInv]:RemoveItem(source, item, count, metadata or false, slot or false)
+    elseif inventorySystem == 'qb' then
+        exports[qbInv]:RemoveItem(source, item, count, slot or false, 'ejj_prison:RemoveItem')
+        TriggerClientEvent('qb-inventory:client:ItemBox', source, QBCore.Shared.Items[item], 'remove', count)
+        return
+    elseif inventorySystem == 'qs' then
+        return exports[qsInv]:RemoveItem(source, item, count, slot or false, metadata or false)
+    elseif inventorySystem == 'origen' then
+        return exports[origenInv]:removeItem(source, item, count, metadata, slot)
     else
-        -- Add custom framework here
+        if Framework == 'esx' then
+            return player.removeInventoryItem(item, count, metadata or false, slot or false)
+        elseif Framework == 'qb' then
+            player.Functions.RemoveItem(item, count, slot, metadata or false)
+            TriggerClientEvent('inventory:client:ItemBox', source, QBCore.Shared.Items[item], "remove", count)
+            return
+        else
+            error("RemoveItem function is not supported in the current framework.")
+        end
     end
 end
 
 function GetItemCount(source, item)
+    local xPlayer
     if Framework == 'esx' then
-        local xPlayer = ESX.GetPlayerFromId(source)
+        xPlayer = ESX.GetPlayerFromId(source)
         if not xPlayer then return 0 end
-        local inventoryItem = xPlayer.getInventoryItem(item)
-        return inventoryItem and inventoryItem.count or 0
-    elseif Framework == 'qbx' then
-        return exports.ox_inventory:GetItemCount(source, item)
     elseif Framework == 'qb' then
-        return exports['qb-inventory']:GetItemCount(source, item) or 0
-    else
-        -- Add custom framework here
+        xPlayer = QBCore.Functions.GetPlayer(source)
+        if not xPlayer then return 0 end
     end
 
-    return 0
+    if inventorySystem == 'codem' then
+        return exports[codemInv]:GetItemsTotalAmount(source, item)
+    elseif inventorySystem == 'ox' then
+        return exports[oxInv]:Search(source, 'count', item)
+    elseif inventorySystem == 'qb' then
+        return exports[qbInv]:GetItemCount(source, item) or 0
+    elseif inventorySystem == 'qs' then
+        local itemData = exports[qsInv]:GetItemByName(source, item)
+        return itemData and (itemData.amount or itemData.count) or 0
+    elseif inventorySystem == 'origen' then
+        return exports[origenInv]:getItemCount(source, item, false, false) or 0
+    else
+        if Framework == 'esx' then
+            local itemData = xPlayer.getInventoryItem(item)
+            return itemData and (itemData.count or itemData.amount) or 0
+        elseif Framework == 'qb' then
+            local itemData = xPlayer.Functions.GetItemByName(item)
+            return itemData and (itemData.amount or itemData.count) or 0
+        else
+            return 0
+        end
+    end
 end
 
 function GetInventoryItems(source)
