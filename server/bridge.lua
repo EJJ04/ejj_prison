@@ -172,6 +172,7 @@ local oxInv = 'ox_inventory'
 local qbInv = 'qb-inventory'
 local qsInv = 'qs-inventory'
 local origenInv = 'origen_inventory'
+local ak47Inv = 'ak47_inventory'
 
 local inventorySystem
 if GetResourceState(codemInv) == 'started' then
@@ -184,6 +185,8 @@ elseif GetResourceState(qsInv) == 'started' then
     inventorySystem = 'qs'
 elseif GetResourceState(origenInv) == 'started' then
     inventorySystem = 'origen'
+elseif GetResourceState(ak47Inv) == 'started' then
+    inventorySystem = 'ak47'
 end
 
 function AddItem(player, item, count, metadata, slot, source)
@@ -199,6 +202,8 @@ function AddItem(player, item, count, metadata, slot, source)
         return exports[qsInv]:AddItem(source, item, count, slot or false, metadata or false)
     elseif inventorySystem == 'origen' then
         return exports[origenInv]:addItem(source, item, count, metadata, slot)
+    elseif inventorySystem == 'ak47' then
+        return exports[ak47Inv]:AddItem(source, item, count, slot, metadata, nil, nil)
     else
         if Framework == 'esx' then
             return player.addInventoryItem(item, count, metadata, slot)
@@ -225,6 +230,8 @@ function RemoveItem(player, item, count, metadata, slot, source)
         return exports[qsInv]:RemoveItem(source, item, count, slot or false, metadata or false)
     elseif inventorySystem == 'origen' then
         return exports[origenInv]:removeItem(source, item, count, metadata, slot)
+    elseif inventorySystem == 'ak47' then
+        return exports[ak47Inv]:RemoveItem(source, item, count, slot)
     else
         if Framework == 'esx' then
             return player.removeInventoryItem(item, count, metadata or false, slot or false)
@@ -258,7 +265,9 @@ function GetItemCount(source, item)
         local itemData = exports[qsInv]:GetItemByName(source, item)
         return itemData and (itemData.amount or itemData.count) or 0
     elseif inventorySystem == 'origen' then
-        return exports[origenInv]:getItemCount(source, item, false, false) or 0
+        return exports[origenInv]:getItemCount(source, item, false, false) or 0    
+    elseif inventorySystem == 'ak47' then
+        return exports[ak47Inv]:Search(source, 'count', item) or 0
     else
         if Framework == 'esx' then
             local itemData = xPlayer.getInventoryItem(item)
@@ -272,7 +281,26 @@ function GetItemCount(source, item)
     end
 end
 
-function GetInventoryItems(source)
+function GetInventoryItems(source)    
+    if inventorySystem == 'ak47' then
+        local items = {}
+
+        local data = exports[ak47Inv]:GetInventoryItems(source)
+        if data then
+            for slot, item in pairs(data) do
+                items[#items + 1] = {
+                    name = item.name,
+                    label = item.label or item.name,
+                    count = item.amount,
+                    weight = item.weight,
+                    metadata = item.info,
+                    slot = slot
+                }
+            end
+        end
+        return items
+    end
+    
     if Framework == 'esx' then
         local xPlayer = ESX.GetPlayerFromId(source)
         local items = {}
