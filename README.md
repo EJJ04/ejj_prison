@@ -12,6 +12,8 @@ A simple and flexible prison system for FiveM servers. Lock up those troublemake
 - 🔄 Framework support (ESX, QB, QBX)
 - 🌍 Multi-language support
 - 📝 Detailed logging system
+- 🤖 NPC/Ped jail system support
+- 🔓 Configurable permission bypass
 
 ## Installation
 
@@ -38,22 +40,27 @@ A simple and flexible prison system for FiveM servers. Lock up those troublemake
 -- Jail a player
 exports['ejj_prison']:JailPlayer(source, targetId, duration, prisonId)
 -- Returns: boolean (success)
+-- Note: source is optional. If not provided, it will be treated as a system action
 
 -- Unjail a player
 exports['ejj_prison']:UnjailPlayer(source, targetId)
 -- Returns: boolean (success)
+-- Note: source is optional. If not provided, it will be treated as a system action
 
 -- Check a player's jail time
 exports['ejj_prison']:CheckJailTime(source, targetId)
 -- Returns: number (jail time in minutes) or false
+-- Note: source is optional. If not provided, it will be treated as a system action
 
 -- Add time to a player's sentence
 exports['ejj_prison']:AddJailTime(source, targetId, additionalTime)
 -- Returns: boolean (success)
+-- Note: source is optional. If not provided, it will be treated as a system action
 
 -- Remove time from a player's sentence
 exports['ejj_prison']:RemoveJailTime(source, targetId, removeTime)
 -- Returns: boolean (success)
+-- Note: source is optional. If not provided, it will be treated as a system action
 ```
 
 ### Client Exports
@@ -75,11 +82,31 @@ Check out `config.lua` to customize:
 - Jail times
 - Required permissions
 - Allowed jobs
+- Permission bypass for NPCs/peds
 - And more!
+
+### Permission Bypass
+
+You can enable permission bypass for NPCs/peds by setting `Config.BypassPermissions = true` in your `config.lua`. This allows:
+- NPCs to jail players without permission checks
+- System scripts to use jail functions without a source
+- Custom integrations to work without permission requirements
+
+Example usage with NPCs:
+```lua
+-- From an NPC script
+exports['ejj_prison']:JailPlayer(nil, targetId, duration, prisonId)
+
+-- From console
+exports['ejj_prison']:JailPlayer(0, targetId, duration, prisonId)
+
+-- From a player script
+exports['ejj_prison']:JailPlayer(source, targetId, duration, prisonId)
+```
 
 ## Support
 
-Need help? Join our Discord: [[Discord](https://discord.gg/N869PRHGfd)]
+Need help? Join our Discord: [Discord](https://discord.gg/N869PRHGfd)
 
 ## License
 

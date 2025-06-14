@@ -25,6 +25,9 @@ Config.Minigame = 'ox_lib'
 -- Should players be able to serve prison time while offline? Set to true to enable offline time serving
 Config.OfflineTimeServing = true
 
+-- Set to true to bypass all permission checks (useful for NPCs/peds or custom systems)
+Config.BypassPermissions = false
+
 -- Items that players should keep when jailed (will not be removed from inventory)
 -- Add item names that should remain with the player during imprisonment
 Config.KeepItemsOnJail = {
