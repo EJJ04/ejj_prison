@@ -708,50 +708,72 @@ RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
 end)
 
 exports('JailPlayer', function(source, targetId, duration, prisonId)
-    if not HasPermission(source, 'jail') then
-        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
+    if not source then
+        source = 0
+    end
+
+    if not Config.BypassPermissions and not HasPermission(source, 'jail') then
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
+        end
         return false
     end
     
     local targetPlayer = GetPlayer(targetId)
     if not targetPlayer then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
     local targetName = GetPlayerName(targetId)
-    local officerName = source == 0 and "Console" or GetPlayerName(source)
+    local officerName = source == 0 and "System" or GetPlayerName(source)
     local targetIdentifier = GetIdentifier(targetId)
     
     if not targetIdentifier then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
     LogJail(officerName, targetName, duration)
     SetJailTime(targetIdentifier, duration, nil, prisonId)
-    TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetName, duration), 'success')
+    if source ~= 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetName, duration), 'success')
+    end
     return true
 end)
 
 exports('UnjailPlayer', function(source, targetId)
-    if not HasPermission(source, 'unjail') then
-        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_unjail'), 'error')
+    if not source then
+        source = 0
+    end
+
+    if not Config.BypassPermissions and not HasPermission(source, 'unjail') then
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_unjail'), 'error')
+        end
         return false
     end
     
     local targetPlayer = GetPlayer(targetId)
     if not targetPlayer then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
     local targetName = GetPlayerName(targetId)
-    local officerName = source == 0 and "Console" or GetPlayerName(source)
+    local officerName = source == 0 and "System" or GetPlayerName(source)
     local targetIdentifier = GetIdentifier(targetId)
     
     if not targetIdentifier then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
@@ -759,71 +781,107 @@ exports('UnjailPlayer', function(source, targetId)
     
     TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
     SetJailTime(targetIdentifier, 0)
-    TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', targetName), 'success')
+    if source ~= 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', targetName), 'success')
+    end
     return true
 end)
 
 exports('CheckJailTime', function(source, targetId)
-    if not HasPermission(source, 'check') then
-        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_check'), 'error')
+    if not source then
+        source = 0
+    end
+
+    if not Config.BypassPermissions and not HasPermission(source, 'check') then
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_check'), 'error')
+        end
         return false
     end
     
     local targetIdentifier = GetIdentifier(targetId)
     if not targetIdentifier then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
     local jailTime = CheckJailTime(targetIdentifier)
     if jailTime and jailTime > 0 then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_jail_time', GetPlayerName(targetId), jailTime), 'info')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_jail_time', GetPlayerName(targetId), jailTime), 'info')
+        end
         return jailTime
     else
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'info')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'info')
+        end
         return 0
     end
 end)
 
 exports('AddJailTime', function(source, targetId, additionalTime)
-    if not HasPermission(source, 'add') then
-        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_add'), 'error')
+    if not source then
+        source = 0
+    end
+
+    if not Config.BypassPermissions and not HasPermission(source, 'add') then
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_add'), 'error')
+        end
         return false
     end
     
     local targetIdentifier = GetIdentifier(targetId)
     if not targetIdentifier then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
     local currentTime = CheckJailTime(targetIdentifier)
     if not currentTime or currentTime <= 0 then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'error')
+        end
         return false
     end
     
     local newTime = currentTime + additionalTime
     SetJailTime(targetIdentifier, newTime)
-    TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_added', GetPlayerName(targetId), additionalTime, newTime), 'success')
+    if source ~= 0 then
+        TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_added', GetPlayerName(targetId), additionalTime, newTime), 'success')
+    end
     return true
 end)
 
 exports('RemoveJailTime', function(source, targetId, removeTime)
-    if not HasPermission(source, 'remove') then
-        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_remove'), 'error')
+    if not source then
+        source = 0
+    end
+
+    if not Config.BypassPermissions and not HasPermission(source, 'remove') then
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_remove'), 'error')
+        end
         return false
     end
     
     local targetIdentifier = GetIdentifier(targetId)
     if not targetIdentifier then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_found'), 'error')
+        end
         return false
     end
     
     local currentTime = CheckJailTime(targetIdentifier)
     if not currentTime or currentTime <= 0 then
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'error')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_not_jailed', GetPlayerName(targetId)), 'error')
+        end
         return false
     end
     
@@ -832,9 +890,13 @@ exports('RemoveJailTime', function(source, targetId, removeTime)
     
     if newTime == 0 then
         TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
-        TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', GetPlayerName(targetId)), 'success')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', GetPlayerName(targetId)), 'success')
+        end
     else
-        TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_removed', GetPlayerName(targetId), removeTime, newTime), 'success')
+        if source ~= 0 then
+            TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_removed', GetPlayerName(targetId), removeTime, newTime), 'success')
+        end
     end
     return true
 end)
