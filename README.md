@@ -12,7 +12,7 @@ A simple and flexible prison system for FiveM servers. Lock up those troublemake
 - 🔄 Framework support (ESX, QB, QBX)
 - 🌍 Multi-language support
 - 📝 Detailed logging system
-- 🤖 NPC/Ped jail system support
+- 🤖 NPC/AI jail system support
 - 🔓 Configurable permission bypass
 
 ## Installation
@@ -36,31 +36,55 @@ A simple and flexible prison system for FiveM servers. Lock up those troublemake
 
 ### Server Exports
 
+The exports can be used in three different ways depending on your needs:
+
+#### 1. Regular Player Usage
 ```lua
--- Jail a player
+-- For regular player actions (requires permissions)
 exports['ejj_prison']:JailPlayer(source, targetId, duration, prisonId)
--- Returns: boolean (success)
--- Note: source is optional. If not provided, it will be treated as a system action
-
--- Unjail a player
 exports['ejj_prison']:UnjailPlayer(source, targetId)
--- Returns: boolean (success)
--- Note: source is optional. If not provided, it will be treated as a system action
+```
 
+#### 2. NPC/AI System Usage
+First, enable permission bypass in config.lua:
+```lua
+Config.BypassPermissions = true
+```
+
+Then you can use the exports without source:
+```lua
+-- For NPC/AI systems (no source needed)
+exports['ejj_prison']:JailPlayer(targetId, duration, prisonId)
+exports['ejj_prison']:UnjailPlayer(targetId)
+
+-- Example in an NPC script:
+local targetPlayer = 3  -- The player ID to jail
+local jailTime = 30    -- Time in minutes
+local prison = "bolingbroke"  -- Prison ID from config
+
+exports['ejj_prison']:JailPlayer(targetPlayer, jailTime, prison)
+```
+
+#### 3. Console/System Usage
+```lua
+-- For console commands or system actions
+exports['ejj_prison']:JailPlayer(0, targetId, duration, prisonId)
+exports['ejj_prison']:UnjailPlayer(0, targetId)
+```
+
+Other server exports:
+```lua
 -- Check a player's jail time
 exports['ejj_prison']:CheckJailTime(source, targetId)
 -- Returns: number (jail time in minutes) or false
--- Note: source is optional. If not provided, it will be treated as a system action
 
 -- Add time to a player's sentence
 exports['ejj_prison']:AddJailTime(source, targetId, additionalTime)
 -- Returns: boolean (success)
--- Note: source is optional. If not provided, it will be treated as a system action
 
 -- Remove time from a player's sentence
 exports['ejj_prison']:RemoveJailTime(source, targetId, removeTime)
 -- Returns: boolean (success)
--- Note: source is optional. If not provided, it will be treated as a system action
 ```
 
 ### Client Exports
@@ -82,27 +106,30 @@ Check out `config.lua` to customize:
 - Jail times
 - Required permissions
 - Allowed jobs
-- Permission bypass for NPCs/peds
+- Permission bypass for NPCs/AI
 - And more!
 
 ### Permission Bypass
 
-You can enable permission bypass for NPCs/peds by setting `Config.BypassPermissions = true` in your `config.lua`. This allows:
-- NPCs to jail players without permission checks
-- System scripts to use jail functions without a source
-- Custom integrations to work without permission requirements
+The permission bypass system allows NPCs, AI systems, or scripts to jail players without requiring normal permissions:
 
-Example usage with NPCs:
+1. Enable bypass in config.lua:
 ```lua
--- From an NPC script
-exports['ejj_prison']:JailPlayer(nil, targetId, duration, prisonId)
-
--- From console
-exports['ejj_prison']:JailPlayer(0, targetId, duration, prisonId)
-
--- From a player script
-exports['ejj_prison']:JailPlayer(source, targetId, duration, prisonId)
+Config.BypassPermissions = true
 ```
+
+2. This allows:
+   - NPCs/AI to jail players directly
+   - Scripts to use jail functions without a source
+   - Automated systems to manage jail time
+   - Custom integrations without permission requirements
+
+3. Example use cases:
+   - AI police officers that can arrest players
+   - Automated jail systems
+   - Anti-cheat integrations
+   - Custom mission/quest systems
+   - Automated moderation systems
 
 ## Support
 
