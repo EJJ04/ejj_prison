@@ -1220,7 +1220,7 @@ RegisterNetEvent('ejj_prison:restoreOriginalClothes', function()
 end)
 
 exports('JailPlayer', function(playerId, jailTime)
-    if not HasPermission('jail') then
+    if not Config.BypassPermissions and not HasPermission('jail') then
         lib.notify({
             title = locale('no_permission'),
             description = locale('no_permission_jail'),
@@ -1238,7 +1238,7 @@ exports('JailPlayer', function(playerId, jailTime)
 end)
 
 exports('UnjailPlayer', function(playerId)
-    if not HasPermission('unjail') then
+    if not Config.BypassPermissions and not HasPermission('unjail') then
         lib.notify({
             title = locale('no_permission'),
             description = locale('no_permission_unjail'),
