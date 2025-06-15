@@ -30,6 +30,7 @@
   "you_were_released": "%s let you out of jail",
   "you_were_unjailed": "%s released you from jail",
   "invalid_time": "That's not a valid amount of time",
+  "prisoner_escaped": "Prisoner %s %s has escaped from prison!",
 
   "tunnel_reset_success": "The escape tunnel's been sealed up",
   "no_tunnel_to_reset": "There's no tunnel to seal up",
@@ -197,4 +198,4 @@
   "training_progress_pushups": "Doing push-ups...",
   "training_progress_weights": "Lifting...",
   "training_progress_situps": "Doing sit-ups..."
-} 
+}
