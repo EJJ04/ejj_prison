@@ -132,12 +132,17 @@ function SetJailTime(identifier, time, source, prisonId)
             end
         end
 
-        SetTimeout(time * 60 * 1000, function()
-            local currentTime = CheckJailTime(source, true)
+        local releaseTime = (time * 60) - 1 
+        SetTimeout(releaseTime * 1000, function()
+            local currentTime = GetCurrentJailTime(identifier)
             if currentTime and currentTime > 0 then
-                SetJailTime(identifier, 0, source, prisonId)
-                if source then
-                    TriggerClientEvent('ejj_prison:notify', source, locale('server_released_automatic'), 'success')
+                local currentSource = source
+                if not currentSource then
+                    currentSource = GetPlayerFromIdentifier(identifier)
+                end
+                SetJailTime(identifier, 0, currentSource, prisonId)
+                if currentSource then
+                    TriggerClientEvent('ejj_prison:notify', currentSource, locale('server_released_automatic'), 'success')
                 end
             end
         end)
@@ -150,7 +155,7 @@ function SetJailTime(identifier, time, source, prisonId)
             if inventory then
                 for _, item in pairs(inventory) do
                     if item and item.name and item.count and item.count > 0 then
-                        AddItem(source, item.name, item.count, item.metadata, item.slot)
+                        AddItem(source, item.name, item.count, item.metadata or {}, item.slot)
                     end
                 end
             end
