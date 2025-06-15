@@ -109,7 +109,8 @@ Config.Prisons = {
         vector3(1761.5, 2540.8, 45.67),
         vector3(1718.4652, 2527.7903, 45.5648),
         vector3(1664.8314, 2501.6807, 45.5648),
-        vector3(1627.8918, 2538.4287, 45.5648)
+        vector3(1627.8918, 2538.4287, 45.5648),
+        vector3(1724.9268, 2506.1248, 45.8069)
     },
     training = { -- Different workout equipment locations in the gym
         chinups = vector4(1746.5942, 2481.6499, 45.7407, 118.2180),
@@ -249,11 +250,11 @@ Config.Prisons = {
     exit = { -- Where the tunnel exits (outside prison walls)
         coords = vector4(1803.2581, 2436.7910, 45.7550, 214.3743), -- Exit location
         radius = 1.5, -- How close to get to exit
-        exitRock = { -- Rock that appears at exit
-            coords = vector3(1803.306, 2436.779, 44.531),
-            model = 'prop_rock_1_i'
+        exitRock = { -- Rock/dirt pile at tunnel exit
+            coords = vector3(1803.258, 2436.791, 44.541),
+            model = 'prop_rock_1_i' -- You can change this to a dirt pile model if you have one
         }
-    },
+            },
     alarm = { -- Prison alarms when someone escapes
         enabled = true, -- Set false to disable alarms
         name = 'PRISON_ALARMS', -- Sound name
@@ -334,13 +335,8 @@ Config.JobCooldown = 5 -- 5 minutes seems reasonable
 -- Electrical work pays the most because it's harder, cooking pays least
 Config.JobRewards = {
     cooking = 5, -- 5 minutes off sentence for cooking job
-    electrician = {5, 5, 10, 10}, -- Per electrical box: 4 boxes, each with its own reward
-    training = {
-        chinups = 3,
-        pushups = 3,
-        weights = 5,
-        situps = 4
-    }
+    electrician = 5, -- One reward for fixing all boxes (total 20 minutes off)
+    training = 20 -- One reward for completing all training exercises (chinups, pushups, weights, situps)
 }
 
 -- Map blips for job locations - these show up on the map so players can find the jobs
@@ -367,7 +363,7 @@ Config.JobBlips = {
 
 -- Dispatch system settings - alerts police when someone breaks out of prison
 Config.Dispatch = {
-    enabled = true, -- Set to false if you don't want dispatch alerts
+    enabled = false, -- Set to false if you don't want dispatch alerts
     system = 'cd_dispatch', -- Which dispatch system you're using - lots of options available
     -- Options: 'cd_dispatch', 'ps-dispatch', 'qs-dispatch', 'core_dispatch', 'rcore_dispatch', 'aty_dispatch', 'op-dispatch', 'origen_police', 'emergencydispatch', 'custom'
     jobs = {'police', 'sheriff'}, -- Which job names should get the alerts
