@@ -9,6 +9,16 @@ local tunnelExists = false
 local tunnelResetTimer = nil 
 local prisonTimer = nil
 
+function GetPlayerFromIdentifier(identifier)
+    for _, playerId in ipairs(GetPlayers()) do
+        local playerIdentifier = GetIdentifier(playerId)
+        if playerIdentifier == identifier then
+            return tonumber(playerId)
+        end
+    end
+    return nil
+end
+
 local function GetPlayerPrison(source)
     local identifier = GetIdentifier(source)
     if not identifier then return nil end
@@ -209,13 +219,24 @@ local function StartPrisonTimer()
         while true do
             Wait(60000) 
             
-            for _, playerId in ipairs(GetPlayers()) do
-                local source = tonumber(playerId)
-                if source then
-                    local jailTime = CheckJailTime(source)
-                    if jailTime <= 0 then
-                        -- Player's time is up, they will be automatically released by CheckJailTime
-                        -- No need to do anything here as CheckJailTime handles the release
+            for identifier, jailData in pairs(jailedPlayers) do
+                if jailData and jailData.time and jailData.startTime then
+                    local elapsedMinutes = math.floor((os.time() - jailData.startTime) / 60)
+                    local remainingTime = math.max(0, jailData.time - elapsedMinutes)
+                    
+                    jailData.time = remainingTime
+                    
+                    if remainingTime > 0 then
+                        MySQL.update('UPDATE ejj_prison SET time = ? WHERE identifier = ?', {remainingTime, identifier})
+                    else
+                        MySQL.update('DELETE FROM ejj_prison WHERE identifier = ?', {identifier})
+                        jailedPlayers[identifier] = nil
+                        
+                        local playerId = GetPlayerFromIdentifier(identifier)
+                        if playerId then
+                            SetJailTime(identifier, 0, playerId, jailData.prisonId)
+                            TriggerClientEvent('ejj_prison:notify', playerId, locale('server_released_automatic'), 'success')
+                        end
                     end
                 end
             end
