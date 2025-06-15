@@ -10,37 +10,12 @@ local function InitializeFramework()
         RegisterNetEvent('esx:playerLoaded', function(xPlayer)
             PlayerData = xPlayer
             PlayerLoaded = true
-            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
-            if jailTime and jailTime > 0 then
-                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
-                if currentPrison then
-                    InitializePrisonSystem(currentPrison)
-                end
-            end
+            TriggerEvent('ejj_prison:playerLoaded')
         end)
 
         RegisterNetEvent('esx:onPlayerLogout', function()
             table.wipe(PlayerData)
             PlayerLoaded = false
-        end)
-
-        AddEventHandler('onResourceStart', function(resourceName)
-            if GetCurrentResourceName() ~= resourceName then return end
-            PlayerData = GetPlayerData()
-            PlayerLoaded = true
-            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
-            if jailTime and jailTime > 0 then
-                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
-                if currentPrison then
-                    InitializePrisonSystem(currentPrison)
-                    local remainingTime = jailTime
-                    if remainingTime > 0 then
-                        SetTimeout(remainingTime * 60 * 1000, function()
-                            TriggerServerEvent('ejj_prison:server:releasePlayer')
-                        end)
-                    end
-                end
-            end
         end)
 
     elseif GetResourceState('qbx_core') == 'started' then
@@ -49,13 +24,7 @@ local function InitializeFramework()
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
-            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
-            if jailTime and jailTime > 0 then
-                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
-                if currentPrison then
-                    InitializePrisonSystem(currentPrison)
-                end
-            end
+            TriggerEvent('ejj_prison:playerLoaded')
         end)
 
         RegisterNetEvent('qbx_core:client:playerLoggedOut', function()
@@ -63,24 +32,6 @@ local function InitializeFramework()
             PlayerLoaded = false
         end)
 
-        AddEventHandler('onResourceStart', function(resourceName)
-            if GetCurrentResourceName() ~= resourceName then return end
-            PlayerData = GetPlayerData()
-            PlayerLoaded = true
-            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
-            if jailTime and jailTime > 0 then
-                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
-                if currentPrison then
-                    InitializePrisonSystem(currentPrison)
-                    local remainingTime = jailTime
-                    if remainingTime > 0 then
-                        SetTimeout(remainingTime * 60 * 1000, function()
-                            TriggerServerEvent('ejj_prison:server:releasePlayer')
-                        end)
-                    end
-                end
-            end
-        end)
     elseif GetResourceState('qb-core') == 'started' then
         QBCore = exports['qb-core']:GetCoreObject()
         Framework = 'qb'
@@ -88,40 +39,13 @@ local function InitializeFramework()
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
-            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
-            if jailTime and jailTime > 0 then
-                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
-                if currentPrison then
-                    InitializePrisonSystem(currentPrison)
-                end
-            end
+            TriggerEvent('ejj_prison:playerLoaded')
         end)
 
         RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
             table.wipe(PlayerData)
             PlayerLoaded = false
         end)
-
-        AddEventHandler('onResourceStart', function(resourceName)
-            if GetCurrentResourceName() ~= resourceName then return end
-            PlayerData = GetPlayerData()
-            PlayerLoaded = true
-            local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
-            if jailTime and jailTime > 0 then
-                currentPrison = lib.callback.await('ejj_prison:getPlayerPrison', false)
-                if currentPrison then
-                    InitializePrisonSystem(currentPrison)
-                    local remainingTime = jailTime
-                    if remainingTime > 0 then
-                        SetTimeout(remainingTime * 60 * 1000, function()
-                            TriggerServerEvent('ejj_prison:server:releasePlayer')
-                        end)
-                    end
-                end
-            end
-        end)
-    else
-        -- Add custom framework here
     end
 end
 
