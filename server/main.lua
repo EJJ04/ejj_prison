@@ -723,11 +723,17 @@ RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
 end)
 
 exports('JailPlayer', function(source, targetId, duration, prisonId)
-    if Config.BypassPermissions and not targetId and source then
-        prisonId = duration
-        duration = targetId
-        targetId = source
-        source = nil
+    if Config.BypassPermissions then
+        if not targetId then
+            prisonId = duration
+            duration = targetId
+            targetId = source
+            source = 0
+        elseif not duration then
+            duration = targetId
+            targetId = source
+            source = 0
+        end
     end
 
     if not source and Config.BypassPermissions then
@@ -769,9 +775,11 @@ exports('JailPlayer', function(source, targetId, duration, prisonId)
 end)
 
 exports('UnjailPlayer', function(source, targetId)
-    if Config.BypassPermissions and not targetId then
-        targetId = source
-        source = nil
+    if Config.BypassPermissions then
+        if not targetId then
+            targetId = source
+            source = 0
+        end
     end
 
     if not source and Config.BypassPermissions then
