@@ -767,7 +767,7 @@ exports('JailPlayer', function(source, targetId, duration, prisonId)
     end
     
     LogJail(officerName, targetName, duration)
-    SetJailTime(targetIdentifier, duration, nil, prisonId)
+    SetJailTime(targetIdentifier, duration, targetId, prisonId)
     if source ~= 0 then
         TriggerClientEvent('ejj_prison:notify', source, locale('player_jailed', targetName, duration), 'success')
     end
@@ -815,7 +815,7 @@ exports('UnjailPlayer', function(source, targetId)
     LogUnjail(officerName, targetName, true)
     
     TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
-    SetJailTime(targetIdentifier, 0)
+    SetJailTime(targetIdentifier, 0, targetId)
     if source ~= 0 then
         TriggerClientEvent('ejj_prison:notify', source, locale('player_unjailed', targetName), 'success')
     end
@@ -885,7 +885,7 @@ exports('AddJailTime', function(source, targetId, additionalTime)
     end
     
     local newTime = currentTime + additionalTime
-    SetJailTime(targetIdentifier, newTime)
+    SetJailTime(targetIdentifier, newTime, targetId)
     if source ~= 0 then
         TriggerClientEvent('ejj_prison:notify', source, locale('jail_time_added', GetPlayerName(targetId), additionalTime, newTime), 'success')
     end
@@ -921,7 +921,7 @@ exports('RemoveJailTime', function(source, targetId, removeTime)
     end
     
     local newTime = math.max(0, currentTime - removeTime)
-    SetJailTime(targetIdentifier, newTime)
+    SetJailTime(targetIdentifier, newTime, targetId)
     
     if newTime == 0 then
         TriggerClientEvent('ejj_prison:client:unjailPlayer', targetId)
