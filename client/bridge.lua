@@ -8,7 +8,6 @@ local function InitializeFramework()
         Framework = 'esx'
 
         RegisterNetEvent('esx:playerLoaded', function(xPlayer)
-            CreatePrisonBlips()
             PlayerData = xPlayer
             PlayerLoaded = true
             local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
@@ -27,7 +26,6 @@ local function InitializeFramework()
 
         AddEventHandler('onResourceStart', function(resourceName)
             if GetCurrentResourceName() ~= resourceName then return end
-            CreatePrisonBlips()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
@@ -49,7 +47,6 @@ local function InitializeFramework()
         Framework = 'qbx'
 
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-            CreatePrisonBlips()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
@@ -68,7 +65,6 @@ local function InitializeFramework()
 
         AddEventHandler('onResourceStart', function(resourceName)
             if GetCurrentResourceName() ~= resourceName then return end
-            CreatePrisonBlips()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
@@ -90,7 +86,6 @@ local function InitializeFramework()
         Framework = 'qb'
 
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
-            CreatePrisonBlips()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
@@ -109,7 +104,6 @@ local function InitializeFramework()
 
         AddEventHandler('onResourceStart', function(resourceName)
             if GetCurrentResourceName() ~= resourceName then return end
-            CreatePrisonBlips()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
             local jailTime = lib.callback.await('ejj_prison:getJailTime', false)
@@ -140,22 +134,6 @@ function GetPlayerData()
         return exports.qbx_core:GetPlayerData()
     else
         -- Add custom framework here
-    end
-end
-
-function CreatePrisonBlips()
-    for prisonId, prisonData in pairs(Config.Prisons) do
-        if prisonData.enabled then
-            local blip = AddBlipForCoord(prisonData.blip.coords.x, prisonData.blip.coords.y, prisonData.blip.coords.z)
-            SetBlipSprite(blip, prisonData.blip.sprite)
-            SetBlipDisplay(blip, 4)
-            SetBlipScale(blip, prisonData.blip.scale)
-            SetBlipColour(blip, prisonData.blip.color)
-            SetBlipAsShortRange(blip, true)
-            BeginTextCommandSetBlipName("STRING")
-            AddTextComponentString(prisonData.blip.label)
-            EndTextCommandSetBlipName(blip)
-        end
     end
 end
 
