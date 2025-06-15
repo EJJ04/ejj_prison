@@ -36,7 +36,7 @@ A simple and flexible prison system for FiveM servers. Lock up those troublemake
 
 ### Server Exports
 
-The exports can be used in three different ways depending on your needs:
+The server exports can be used in multiple ways depending on your needs:
 
 #### 1. Regular Player Usage
 ```lua
@@ -45,24 +45,47 @@ exports['ejj_prison']:JailPlayer(source, targetId, duration, prisonId)
 exports['ejj_prison']:UnjailPlayer(source, targetId)
 ```
 
-#### 2. NPC/AI System Usage
+#### 2. NPC/AI System Usage (With BypassPermissions)
 First, enable permission bypass in config.lua:
 ```lua
 Config.BypassPermissions = true
 ```
 
-Then you can use the exports without source:
+Then you can use the exports in three different ways:
+
 ```lua
--- For NPC/AI systems (no source needed)
+-- Method 1: Without source (recommended for NPCs/AI)
 exports['ejj_prison']:JailPlayer(targetId, duration, prisonId)
 exports['ejj_prison']:UnjailPlayer(targetId)
 
--- Example in an NPC script:
-local targetPlayer = 3  -- The player ID to jail
-local jailTime = 30    -- Time in minutes
-local prison = "bolingbroke"  -- Prison ID from config
+-- Example:
+exports['ejj_prison']:JailPlayer(5, 30, "bolingbroke") -- Jail player 5 for 30 minutes
+exports['ejj_prison']:UnjailPlayer(5) -- Unjail player 5
 
+-- Method 2: With source = 0 (system action)
+exports['ejj_prison']:JailPlayer(0, targetId, duration, prisonId)
+exports['ejj_prison']:UnjailPlayer(0, targetId)
+
+-- Method 3: With source = nil
+exports['ejj_prison']:JailPlayer(nil, targetId, duration, prisonId)
+exports['ejj_prison']:UnjailPlayer(nil, targetId)
+```
+
+Example in an NPC/AI script:
+```lua
+-- In your NPC/AI script
+local targetPlayer = 3      -- The player ID to jail
+local jailTime = 30        -- Time in minutes
+local prison = "bolingbroke"  -- Prison ID from config (optional)
+
+-- Simple jail without prison specified (uses first enabled prison)
+exports['ejj_prison']:JailPlayer(targetPlayer, jailTime)
+
+-- Jail with specific prison
 exports['ejj_prison']:JailPlayer(targetPlayer, jailTime, prison)
+
+-- Later, to unjail
+exports['ejj_prison']:UnjailPlayer(targetPlayer)
 ```
 
 #### 3. Console/System Usage
