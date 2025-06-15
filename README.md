@@ -89,15 +89,50 @@ exports['ejj_prison']:RemoveJailTime(source, targetId, removeTime)
 
 ### Client Exports
 
-```lua
--- Jail a player (client-side)
-exports['ejj_prison']:JailPlayer(playerId, jailTime)
--- Returns: boolean (success)
+The client exports can be used in two ways:
 
--- Unjail a player (client-side)
+#### 1. Regular Usage
+```lua
+-- Jail a player with specific prison
+exports['ejj_prison']:JailPlayer(playerId, jailTime, prisonId)
+-- Example:
+exports['ejj_prison']:JailPlayer(5, 30, "bolingbroke") -- Jail player 5 for 30 minutes in Bolingbroke
+
+-- Jail a player without specifying prison (uses first enabled prison)
+exports['ejj_prison']:JailPlayer(playerId, jailTime)
+-- Example:
+exports['ejj_prison']:JailPlayer(5, 30) -- Jail player 5 for 30 minutes in default prison
+
+-- Unjail a player
 exports['ejj_prison']:UnjailPlayer(playerId)
--- Returns: boolean (success)
+-- Example:
+exports['ejj_prison']:UnjailPlayer(5) -- Unjail player 5
 ```
+
+#### 2. NPC/AI System Usage
+First, enable permission bypass in config.lua:
+```lua
+Config.BypassPermissions = true
+```
+
+Then you can use the client exports in your NPC/AI scripts:
+```lua
+-- In an NPC/AI script
+local targetPlayer = 3      -- The player ID to jail
+local jailTime = 30        -- Time in minutes
+local prison = "bolingbroke"  -- Optional: specific prison ID
+
+-- Jail with specific prison
+exports['ejj_prison']:JailPlayer(targetPlayer, jailTime, prison)
+
+-- Or jail using default prison
+exports['ejj_prison']:JailPlayer(targetPlayer, jailTime)
+
+-- Later, to unjail
+exports['ejj_prison']:UnjailPlayer(targetPlayer)
+```
+
+All client exports return `boolean` indicating success or failure.
 
 ## Configuration
 
