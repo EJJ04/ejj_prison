@@ -675,18 +675,33 @@ RegisterNetEvent('ejj_prison:server:craftingActivity', function(item, success)
     LogCrafting(playerName, item, success)
 end)
 
-RegisterNetEvent('ejj_prison:jailPlayerExport', function(playerId, jailTime)
+RegisterNetEvent('ejj_prison:jailPlayerExport', function(playerId, jailTime, prisonId)
     local src = source
-    local targetName = GetPlayerName(playerId)
-    local officerName = GetPlayerName(src)
-    LogJail(officerName, targetName, jailTime, "Exported")
+    
+    if not prisonId then
+        for id, prisonData in pairs(Config.Prisons) do
+            if prisonData.enabled then
+                prisonId = id
+                break
+            end
+        end
+    end
+    
+    if Config.BypassPermissions then
+        exports['ejj_prison']:JailPlayer(nil, playerId, jailTime, prisonId)
+    else
+        exports['ejj_prison']:JailPlayer(src, playerId, jailTime, prisonId)
+    end
 end)
 
 RegisterNetEvent('ejj_prison:unjailPlayerExport', function(playerId)
     local src = source
-    local targetName = GetPlayerName(playerId)
-    local officerName = GetPlayerName(src)
-    LogUnjail(officerName, targetName, true)
+    
+    if Config.BypassPermissions then
+        exports['ejj_prison']:UnjailPlayer(nil, playerId)
+    else
+        exports['ejj_prison']:UnjailPlayer(src, playerId)
+    end
 end)
 
 RegisterNetEvent('ejj_prison:server:resourcePickup', function(item)
