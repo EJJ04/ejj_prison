@@ -145,13 +145,13 @@ Config.Prisons = {
             },
             items = { -- What's available in the shop
                 {
-                    name = 'water', -- Item name (must match your items.lua or database)
+                    name = 'water_bottle', -- Item name (must match your items.lua or database)
                     label = 'Water Bottle', -- What players see
                     price = 0, -- Free water because prison
                     icon = 'fas fa-tint' -- Water drop icon
                 },
                 {
-                    name = 'burger', -- Food item
+                    name = 'tosti', -- Food item
                     label = 'Prison Burger', -- Probably not very tasty
                     price = 0, -- Also free
                     icon = 'fas fa-hamburger' -- Burger icon
@@ -261,7 +261,7 @@ Config.Prisons = {
         duration = 60000, -- How long alarms last (60 seconds)
         maxDistance = 500.0, -- How far away you can hear them
         center = vector3(1774.6844, 2480.8213, 45.7408) -- Where sound comes from
-    }
+        }
         },
         zone = { -- Prison boundary zone - this prevents players from escaping by just walking out
             enabled = true, -- Set to false if you don't want zone restrictions
@@ -404,3 +404,6 @@ Config.JobAnimations = {
         situps = { dict = 'amb@world_human_sit_ups@male@base', anim = 'base', duration = 10000 }
     }
 }
+
+-- Should players get their clothes and inventory (from DB column) back when escaping prison (like unjail)?
+Config.RestoreOnEscape = true -- Set to false if you do NOT want this behavior
