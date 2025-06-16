@@ -1156,6 +1156,98 @@ RegisterNetEvent('ejj_prison:createTunnel', function(prisonId)
     CreateTunnel(prisonId)
 end)
 
+function InitializePrisonSystem(prisonId)
+    if not prisonId then 
+        return 
+    end
+    currentPrison = prisonId
+    local prisonData = Config.Prisons[prisonId]
+    if not prisonData then 
+        return 
+    end
+    if prisonBlips then
+        for _, blip in pairs(prisonBlips) do
+            if blip and DoesBlipExist(blip) then
+                RemoveBlip(blip)
+            end
+        end
+        prisonBlips = {}
+    end
+    CleanupAllPrisonNPCs()
+    isInJail = true
+    local playerPed = PlayerPedId()
+    local coords = prisonData.locations.jail
+    SetEntityCoords(playerPed, coords.x, coords.y, coords.z)
+    SetEntityHeading(playerPed, coords.w or 0.0)
+    SpawnAllPrisonNPCs()
+    CreatePrisonBlips()
+    CreatePrisonZones()
+    SpawnResourceObjects(prisonId)
+    CreateShopBlip(prisonId)
+    TriggerEvent('ejj_prison:client:ChangeClothes')
+    InitializeInteractionPoints()
+    InitializeResourceSystem(prisonId)
+    InitializeShopSystem()
+    InitializeCraftingSystem()
+    InitializeEscapeSystem()
+    for prisonId, prisonData in pairs(GetAllEnabledPrisons()) do
+        local guardPoint = lib.points.new({
+            coords = prisonData.locations.guard,
+            distance = Config.Guard.radius
+        })
+        guardPoint.prisonId = prisonId
+        function guardPoint:onEnter()
+            if currentPrison == self.prisonId then
+                ShowTextUI(locale('ui_talk_guard'))
+            end
+        end
+        function guardPoint:onExit()
+            HideTextUI()
+        end
+        function guardPoint:nearby()
+            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
+                HandleGuardInteraction(self.prisonId)
+            end
+        end
+        local shopPoint = lib.points.new({
+            coords = prisonData.shop.ped.coords,
+            distance = prisonData.shop.ped.radius
+        })
+        shopPoint.prisonId = prisonId
+        function shopPoint:onEnter()
+            if currentPrison == self.prisonId then
+                ShowTextUI(locale('ui_prison_shop'))
+            end
+        end
+        function shopPoint:onExit()
+            HideTextUI()
+        end
+        function shopPoint:nearby()
+            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
+                HandleShopInteraction(self.prisonId)
+            end
+        end
+        local craftingPoint = lib.points.new({
+            coords = prisonData.crafting.prisoner.coords,
+            distance = prisonData.crafting.prisoner.radius
+        })
+        craftingPoint.prisonId = prisonId
+        function craftingPoint:onEnter()
+            if currentPrison == self.prisonId then
+                ShowTextUI(locale('ui_prison_crafting'))
+            end
+        end
+        function craftingPoint:onExit()
+            HideTextUI()
+        end
+        function craftingPoint:nearby()
+            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
+                HandleCraftingInteraction(self.prisonId)
+            end
+        end
+    end
+end
+
 for prisonId, _ in pairs(resourceObjects) do
     CleanupResourceObjects(prisonId)
 end
