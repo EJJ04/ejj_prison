@@ -10,7 +10,6 @@ local function InitializeFramework()
         RegisterNetEvent('esx:playerLoaded', function(xPlayer)
             PlayerData = xPlayer
             PlayerLoaded = true
-            TriggerEvent('ejj_prison:playerLoaded')
         end)
 
         RegisterNetEvent('esx:onPlayerLogout', function()
@@ -24,7 +23,6 @@ local function InitializeFramework()
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
-            TriggerEvent('ejj_prison:playerLoaded')
         end)
 
         RegisterNetEvent('qbx_core:client:playerLoggedOut', function()
@@ -39,7 +37,6 @@ local function InitializeFramework()
         AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
             PlayerData = GetPlayerData()
             PlayerLoaded = true
-            TriggerEvent('ejj_prison:playerLoaded')
         end)
 
         RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
@@ -59,6 +56,77 @@ function GetPlayerData()
     else
         -- Add custom framework here
     end
+end
+
+function Progress(opts)
+    local label = opts.label or 'Processing...'
+    local duration = opts.duration or 3000
+    local anim = opts.anim
+    local finished = false
+
+    if anim and anim.dict and anim.clip and lib and cache and cache.ped then
+        lib.playAnim(
+            cache.ped,
+            anim.dict,
+            anim.clip,
+            anim.blendIn or 8.0,
+            anim.blendOut or 8.0,
+            duration,
+            anim.flag or 49
+        )
+    end
+
+    if Framework == 'esx' and ESX and ESX.Progressbar then
+        ESX.Progressbar(label, duration, {
+            disableMovement = true,
+            disableCarMovement = true,
+            disableMouse = false,
+            disableCombat = true,
+        }, function(cancelled)
+            finished = not cancelled
+        end)
+        while not finished do Wait(50) end
+    elseif Framework == 'qb' and QBCore and QBCore.Functions and QBCore.Functions.Progressbar then
+        QBCore.Functions.Progressbar('ejj_prison_progress', label, duration, false, true, {
+            disableMovement = true,
+            disableCarMovement = true,
+            disableMouse = false,
+            disableCombat = true,
+        }, {}, {}, {}, function()
+            finished = true
+        end, function()
+            finished = false
+        end)
+        while finished == false do Wait(50) end
+    elseif Framework == 'qbx' and exports['qbx_core'] and exports['qbx_core'].Progressbar then
+        exports['qbx_core']:Progressbar('ejj_prison_progress', label, duration, false, true, {
+            disableMovement = true,
+            disableCarMovement = true,
+            disableMouse = false,
+            disableCombat = true,
+        }, {}, {}, {}, function()
+            finished = true
+        end, function()
+            finished = false
+        end)
+        while finished == false do Wait(50) end
+    elseif lib and lib.progressBar then
+        finished = lib.progressBar({
+            duration = duration,
+            label = label,
+            useWhileDead = false,
+            canCancel = true,
+            disable = { move = true, car = true, combat = true }
+        })
+    else
+        Wait(duration)
+        finished = true
+    end
+
+    if anim and anim.dict and cache and cache.ped then
+        ClearPedTasks(cache.ped)
+    end
+    return finished
 end
 
 InitializeFramework()

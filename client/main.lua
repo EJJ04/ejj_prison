@@ -23,132 +23,7 @@ local lastJobCheck = 0
 local jobCheckInterval = nil
 local completedTrainingExercises = {}
 local activeAlarms = {}
-
-function GetAllEnabledPrisons()
-    local enabledPrisons = {}
-    for prisonId, prisonData in pairs(Config.Prisons) do
-        if prisonData.enabled then
-            enabledPrisons[prisonId] = prisonData
-        end
-    end
-    return enabledPrisons
-end
-
-function InitializePrisonSystem(prisonId)
-    if not prisonId then 
-        return 
-    end
-    
-    currentPrison = prisonId
-    
-    local prisonData = Config.Prisons[prisonId]
-    if not prisonData then 
-        return 
-    end
-    
-    if prisonBlips then
-        for _, blip in pairs(prisonBlips) do
-            if blip and DoesBlipExist(blip) then
-                RemoveBlip(blip)
-            end
-        end
-        prisonBlips = {}
-    end
-    CleanupAllPrisonNPCs()
-    
-    isInJail = true
-    
-    local playerPed = PlayerPedId()
-    local coords = prisonData.locations.jail
-    SetEntityCoords(playerPed, coords.x, coords.y, coords.z)
-    SetEntityHeading(playerPed, coords.w or 0.0)
-    
-    SpawnAllPrisonNPCs()
-    CreatePrisonBlips()
-    CreatePrisonZones()
-    SpawnResourceObjects(prisonId)
-    CreateShopBlip(prisonId)
-    
-    TriggerEvent('ejj_prison:client:ChangeClothes')
-    InitializeInteractionPoints()
-    InitializeResourceSystem(prisonId)
-    InitializeShopSystem()
-    InitializeCraftingSystem()
-    InitializeEscapeSystem()
-    
-    for prisonId, prisonData in pairs(GetAllEnabledPrisons()) do
-        local guardPoint = lib.points.new({
-            coords = prisonData.locations.guard,
-            distance = Config.Guard.radius
-        })
-        
-        guardPoint.prisonId = prisonId
-        
-        function guardPoint:onEnter()
-            if currentPrison == self.prisonId then
-                ShowTextUI(locale('ui_talk_guard'))
-            end
-        end
-        
-        function guardPoint:onExit()
-            HideTextUI()
-        end
-        
-        function guardPoint:nearby()
-            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
-                HandleGuardInteraction(self.prisonId)
-            end
-        end
-        
-        local shopPoint = lib.points.new({
-            coords = prisonData.shop.ped.coords,
-            distance = prisonData.shop.ped.radius
-        })
-        
-        shopPoint.prisonId = prisonId
-        
-        function shopPoint:onEnter()
-            if currentPrison == self.prisonId then
-                ShowTextUI(locale('ui_prison_shop'))
-            end
-        end
-        
-        function shopPoint:onExit()
-            HideTextUI()
-        end
-        
-        function shopPoint:nearby()
-            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
-                HandleShopInteraction(self.prisonId)
-            end
-        end
-        
-        local craftingPoint = lib.points.new({
-            coords = prisonData.crafting.prisoner.coords,
-            distance = prisonData.crafting.prisoner.radius
-        })
-        
-        craftingPoint.prisonId = prisonId
-        
-        function craftingPoint:onEnter()
-            if currentPrison == self.prisonId then
-                ShowTextUI(locale('ui_prison_crafting'))
-            end
-        end
-        
-        function craftingPoint:onExit()
-            HideTextUI()
-        end
-        
-        function craftingPoint:nearby()
-            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
-                HandleCraftingInteraction(self.prisonId)
-            end
-        end
-    end
-    
-    TriggerEvent('ejj_prison:client:setJailClothes')
-end
+local alarmTimers = {}
 
 local function GetAllEnabledPrisons()
     if not Config.Prisons then
@@ -189,54 +64,6 @@ end
 
 function HideTextUI()
     lib.hideTextUI()
-end
-
-function ShowMenu(data)
-    if not data or not data.id then return end
-    
-    local menuData = {
-        id = data.id,
-        title = data.title,
-        menu = data.menu,
-        canClose = data.canClose ~= false,
-        onExit = data.onExit,
-        onBack = data.onBack,
-        options = {}
-    }
-    
-    if data.items then
-        for _, item in ipairs(data.items) do
-            local option = {
-                title = item.title,
-                description = item.description,
-                icon = item.icon,
-                disabled = item.disabled,
-                menu = item.menu,
-                arrow = item.arrow,
-                metadata = item.metadata,
-                image = item.image,
-                progress = item.progress,
-                colorScheme = item.colorScheme
-            }
-            
-            if item.onSelect then
-                option.onSelect = function()
-                    item.onSelect(item)
-                end
-            elseif item.event then
-                option.event = item.event
-                option.args = item.args
-            elseif item.serverEvent then
-                option.serverEvent = item.serverEvent
-                option.args = item.args
-            end
-            
-            table.insert(menuData.options, option)
-        end
-    end
-    
-    lib.registerContext(menuData)
-    lib.showContext(data.id)
 end
 
 function CreateJobBlip(coords, jobType, name)
@@ -395,22 +222,25 @@ function StartPrisonAlarm(prisonId)
     activeAlarms[prisonId] = true
     local prisonConfig = GetPrisonConfig(prisonId)
     if not prisonConfig or not prisonConfig.escape.alarm.enabled then return end
-    
     local playerCoords = GetEntityCoords(cache.ped)
     local distance = #(playerCoords - prisonConfig.escape.alarm.center)
-    
     if distance > prisonConfig.escape.alarm.maxDistance then return end
-    
     PrepareAlarm(prisonConfig.escape.alarm.name)
-    
     local timeout = 0
     while not PrepareAlarm(prisonConfig.escape.alarm.name) and timeout < 50 do
         Wait(100)
         timeout = timeout + 1
     end
-    
     if PrepareAlarm(prisonConfig.escape.alarm.name) then
         StartAlarm(prisonConfig.escape.alarm.name, -1)
+        if alarmTimers[prisonId] then
+            if Config.Debug then print('Clearing previous alarm timer for', prisonId) end
+            alarmTimers[prisonId]:forceEnd(false)
+        end
+        alarmTimers[prisonId] = lib.timer(prisonConfig.escape.alarm.duration or 60000, function()
+            StopPrisonAlarmSound(prisonId)
+            alarmTimers[prisonId] = nil
+        end, true)
     end
 end
 
@@ -419,6 +249,10 @@ function StopPrisonAlarm()
         if prisonData.escape.alarm.enabled then
             StopAlarm(prisonData.escape.alarm.name, true)
             activeAlarms[prisonId] = nil
+            if alarmTimers[prisonId] then
+                alarmTimers[prisonId]:forceEnd(false)
+                alarmTimers[prisonId] = nil
+            end
         end
     end
 end
@@ -447,6 +281,14 @@ function PlayPrisonAlarmSound(prisonId)
     end
     if PrepareAlarm(prisonConfig.escape.alarm.name) then
         StartAlarm(prisonConfig.escape.alarm.name, -1)
+        if alarmTimers[prisonId] then
+            if Config.Debug then print('Clearing previous alarm timer for', prisonId) end
+            alarmTimers[prisonId]:forceEnd(false)
+        end
+        alarmTimers[prisonId] = lib.timer(prisonConfig.escape.alarm.duration or 60000, function()
+            StopPrisonAlarmSound(prisonId)
+            alarmTimers[prisonId] = nil
+        end, true)
     end
 end
 
@@ -456,6 +298,10 @@ function StopPrisonAlarmSound(prisonId)
     if prisonConfig and prisonConfig.escape.alarm.enabled then
         StopAlarm(prisonConfig.escape.alarm.name, true)
         activeAlarms[prisonId] = nil
+        if alarmTimers[prisonId] then
+            alarmTimers[prisonId]:forceEnd(false)
+            alarmTimers[prisonId] = nil
+        end
     end
 end
 
@@ -481,6 +327,52 @@ function InitializeInteractionPoints()
         function guardPoint:nearby()
             if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
                 HandleGuardInteraction(self.prisonId)
+            end
+        end
+        
+        local shopPoint = lib.points.new({
+            coords = prisonData.shop.ped.coords,
+            distance = prisonData.shop.ped.radius
+        })
+        
+        shopPoint.prisonId = prisonId
+        
+        function shopPoint:onEnter()
+            if currentPrison == self.prisonId then
+                ShowTextUI(locale('ui_prison_shop'))
+            end
+        end
+        
+        function shopPoint:onExit()
+            HideTextUI()
+        end
+        
+        function shopPoint:nearby()
+            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
+                HandleShopInteraction(self.prisonId)
+            end
+        end
+        
+        local craftingPoint = lib.points.new({
+            coords = prisonData.crafting.prisoner.coords,
+            distance = prisonData.crafting.prisoner.radius
+        })
+        
+        craftingPoint.prisonId = prisonId
+        
+        function craftingPoint:onEnter()
+            if currentPrison == self.prisonId then
+                ShowTextUI(locale('ui_prison_crafting'))
+            end
+        end
+        
+        function craftingPoint:onExit()
+            HideTextUI()
+        end
+        
+        function craftingPoint:nearby()
+            if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
+                HandleCraftingInteraction(self.prisonId)
             end
         end
     end
@@ -774,32 +666,61 @@ end
 function InitializeResourceSystem(prisonId)
     local prisonConfig = GetPrisonConfig(prisonId)
     if not prisonConfig then return end
-    
     for resourceKey, resourceConfig in pairs(prisonConfig.crafting.resources) do
         local point = lib.points.new({
             coords = resourceConfig.coords,
             distance = resourceConfig.radius
         })
-        
         point.resourceKey = resourceKey
         point.prisonId = prisonId
-        
         function point:onEnter()
             if currentPrison == self.prisonId then
                 ShowTextUI(locale('ui_pickup_resource', resourceConfig.label))
             end
         end
-        
         function point:onExit()
             HideTextUI()
         end
-        
         function point:nearby()
             if currentPrison == self.prisonId and IsControlJustReleased(0, 38) then
-                TriggerServerEvent('ejj_prison:server:resourcePickup', resourceConfig.item)
+                if self._pickedUp then return end
+                self._pickedUp = true
+                local animConfig = Config.ResourcePickupAnimation or {dict = 'pickup_object', anim = 'pickup_low', duration = 2500, flag = 49}
+                local finished = Progress({
+                    label = locale('progress_picking_up', resourceConfig.label),
+                    duration = animConfig.duration or resourceConfig.pickupTime or 2500,
+                    anim = {
+                        dict = animConfig.dict or 'pickup_object',
+                        clip = animConfig.anim or animConfig.clip or 'pickup_low',
+                        flag = animConfig.flag or 49,
+                        blendIn = animConfig.blendIn,
+                        blendOut = animConfig.blendOut
+                    }
+                })
+                if finished then
+                    TriggerServerEvent('ejj_prison:server:resourcePickup', resourceConfig.item)
+                    if resourceObjects[self.prisonId] and resourceObjects[self.prisonId][self.resourceKey] then
+                        local obj = resourceObjects[self.prisonId][self.resourceKey]
+                        if DoesEntityExist(obj) then
+                            SetEntityAsMissionEntity(obj, true, true)
+                            DeleteEntity(obj)
+                        end
+                        resourceObjects[self.prisonId][self.resourceKey] = nil
+                    end
+                    if self.remove then self:remove() end
+                    for i = #resourcePoints, 1, -1 do
+                        local pt = resourcePoints[i]
+                        if pt.prisonId == self.prisonId and pt.resourceKey == self.resourceKey then
+                            if pt.remove then pt:remove() end
+                            table.remove(resourcePoints, i)
+                        end
+                    end
+                else
+                    self._pickedUp = false 
+                end
+                HideTextUI()
             end
         end
-        
         table.insert(resourcePoints, point)
     end
 end
@@ -1088,14 +1009,6 @@ function RemoveShopBlip()
     end
 end
 
-function TeleportToPrison(prisonId)
-    local prisonConfig = GetPrisonConfig(prisonId)
-    if prisonConfig then
-        SetEntityCoords(cache.ped, prisonConfig.locations.jail.x, prisonConfig.locations.jail.y, prisonConfig.locations.jail.z)
-        SetEntityHeading(cache.ped, prisonConfig.locations.jail.w or 0.0)
-    end
-end
-
 function TeleportToPrisonHospital()
     local prisonConfig = GetPrisonConfig(currentPrison)
     if prisonConfig and prisonConfig.hospital then
@@ -1159,19 +1072,15 @@ AddEventHandler('esx:onPlayerSpawn', function()
     end
 end)
 
-RegisterNetEvent('ejj_prison:setDeathStatus', function(deathStatus)
+RegisterNetEvent('hospital:client:SetDeathStatus', function(status)
     if isInJail then
-        if deathStatus then
+        if status then
             isDead = true
         else
             isDead = false
             TeleportToPrisonHospital()
         end
     end
-end)
-
-RegisterNetEvent('ejj_prison:teleportToPrison', function(prisonId)
-    TeleportToPrison(prisonId)
 end)
 
 RegisterNetEvent('ejj_prison:client:setJailStatus', function(status)
@@ -1246,3 +1155,7 @@ end)
 RegisterNetEvent('ejj_prison:createTunnel', function(prisonId)
     CreateTunnel(prisonId)
 end)
+
+for prisonId, _ in pairs(resourceObjects) do
+    CleanupResourceObjects(prisonId)
+end
