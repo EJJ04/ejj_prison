@@ -356,3 +356,26 @@ function GetOnlinePolice()
     end
     return policeSources
 end
+
+function GetPlayerName(source)
+    if not Framework then return 'Unknown' end
+    if Framework == 'esx' then
+        local xPlayer = ESX.GetPlayerFromId(source)
+        if xPlayer and xPlayer.getName then
+            return xPlayer:getName()
+        end
+    elseif Framework == 'qbx' then
+        local Player = exports.qbx_core:GetPlayer(source)
+        if Player and Player.PlayerData and Player.PlayerData.charinfo then
+            local ci = Player.PlayerData.charinfo
+            return (ci.firstname or '') .. ' ' .. (ci.lastname or '')
+        end
+    elseif Framework == 'qb' then
+        local Player = QBCore.Functions.GetPlayer(source)
+        if Player and Player.PlayerData and Player.PlayerData.charinfo then
+            local ci = Player.PlayerData.charinfo
+            return (ci.firstname or '') .. ' ' .. (ci.lastname or '')
+        end
+    end
+    return 'Unknown'
+end
