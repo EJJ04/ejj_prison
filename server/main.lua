@@ -786,6 +786,11 @@ RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
 end)
 
 local function JailPlayer(source, targetId, duration, prisonId)
+    -- Handle cases where source is nil (for AI/NPC scripts)
+    if not source then
+        source = 0
+    end
+    
     if Config.BypassPermissions then
         if not targetId then
             prisonId = duration
@@ -799,14 +804,13 @@ local function JailPlayer(source, targetId, duration, prisonId)
         end
     end
 
-    if not source and Config.BypassPermissions then
+    -- Always set source to 0 if it's nil or false to handle AI/NPC calls
+    if not source or source == false then
         source = 0
     end
 
-    if not Config.BypassPermissions and not HasPermission(source, 'jail') then
-        if source ~= 0 then
-            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
-        end
+    if not Config.BypassPermissions and source ~= 0 and not HasPermission(source, 'jail') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_jail'), 'error')
         return false
     end
     
@@ -819,7 +823,7 @@ local function JailPlayer(source, targetId, duration, prisonId)
     end
     
     local targetName = GetPlayerName(targetId)
-    local officerName = source == 0 and "System" or GetPlayerName(source)
+    local officerName = source == 0 and "System/AI" or GetPlayerName(source)
     local targetIdentifier = GetIdentifier(targetId)
     
     if not targetIdentifier then
@@ -838,6 +842,11 @@ local function JailPlayer(source, targetId, duration, prisonId)
 end
 
 local function UnjailPlayer(source, targetId)
+    -- Handle cases where source is nil (for AI/NPC scripts)
+    if not source then
+        source = 0
+    end
+    
     if Config.BypassPermissions then
         if not targetId then
             targetId = source
@@ -845,14 +854,13 @@ local function UnjailPlayer(source, targetId)
         end
     end
 
-    if not source and Config.BypassPermissions then
+    -- Always set source to 0 if it's nil or false to handle AI/NPC calls
+    if not source or source == false then
         source = 0
     end
 
-    if not Config.BypassPermissions and not HasPermission(source, 'unjail') then
-        if source ~= 0 then
-            TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_unjail'), 'error')
-        end
+    if not Config.BypassPermissions and source ~= 0 and not HasPermission(source, 'unjail') then
+        TriggerClientEvent('ejj_prison:notify', source, locale('no_permission_unjail'), 'error')
         return false
     end
     
@@ -865,7 +873,7 @@ local function UnjailPlayer(source, targetId)
     end
     
     local targetName = GetPlayerName(targetId)
-    local officerName = source == 0 and "System" or GetPlayerName(source)
+    local officerName = source == 0 and "System/AI" or GetPlayerName(source)
     local targetIdentifier = GetIdentifier(targetId)
     
     if not targetIdentifier then
