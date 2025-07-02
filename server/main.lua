@@ -785,7 +785,7 @@ RegisterNetEvent('ejj_prison:server:itemCraft', function(recipeId)
     TriggerClientEvent('ejj_prison:notify', src, locale('crafting_success', recipe.result.item), 'success')
 end)
 
-local function JailPlayer(source, targetId, duration, prisonId)
+function JailPlayer(source, targetId, duration, prisonId)
     -- Handle cases where source is nil (for AI/NPC scripts)
     if not source then
         source = 0
